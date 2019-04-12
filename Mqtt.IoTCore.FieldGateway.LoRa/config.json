@@ -1,0 +1,9 @@
+﻿{
+  "MQTTUserName": "",
+  "MQTTPassword": "",
+  "MqttTopicFormat": "{0}/feeds/{1}{2}",
+  "MQTTClientID": "",
+  "MQTTServer": "",
+  "Address": "LoRaIoT2",
+  "Frequency": 433000000.0
+}

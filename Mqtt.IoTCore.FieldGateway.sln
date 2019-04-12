@@ -1,0 +1,65 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mqtt.IoTCore.FieldGateway.LoRa", "Mqtt.IoTCore.FieldGateway.LoRa\Mqtt.IoTCore.FieldGateway.LoRa.csproj", "{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rfm9XLoRaDevice", "Rfm9XLoRaDevice\Rfm9XLoRaDevice.csproj", "{7C875578-673E-4896-8B01-8CD9F6DF0C7D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|ARM.ActiveCfg = Debug|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|ARM.Build.0 = Debug|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|ARM.Deploy.0 = Debug|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x64.ActiveCfg = Debug|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x64.Build.0 = Debug|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x64.Deploy.0 = Debug|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x86.ActiveCfg = Debug|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x86.Build.0 = Debug|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Debug|x86.Deploy.0 = Debug|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|Any CPU.ActiveCfg = Release|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|ARM.ActiveCfg = Release|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|ARM.Build.0 = Release|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|ARM.Deploy.0 = Release|ARM
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x64.ActiveCfg = Release|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x64.Build.0 = Release|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x64.Deploy.0 = Release|x64
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x86.ActiveCfg = Release|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x86.Build.0 = Release|x86
+		{B0FCF65E-A145-4E11-B2AF-CBDE791B6BD1}.Release|x86.Deploy.0 = Release|x86
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|ARM.Build.0 = Debug|ARM
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|x64.ActiveCfg = Debug|x64
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|x64.Build.0 = Debug|x64
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|x86.ActiveCfg = Debug|x86
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Debug|x86.Build.0 = Debug|x86
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|ARM.ActiveCfg = Release|ARM
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|ARM.Build.0 = Release|ARM
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|x64.ActiveCfg = Release|x64
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|x64.Build.0 = Release|x64
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|x86.ActiveCfg = Release|x86
+		{7C875578-673E-4896-8B01-8CD9F6DF0C7D}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4DDDCB58-41DB-418F-9AB6-B9125B150417}
+	EndGlobalSection
+EndGlobal
