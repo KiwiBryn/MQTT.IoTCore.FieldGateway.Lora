@@ -101,7 +101,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #endif
 		private readonly TimeSpan DeviceRestartPeriod = new TimeSpan(0, 0, 25);
 
-		private readonly LoggingChannel logging = new LoggingChannel("devMobile Azure MQTT LoRa Field Gateway", null, new Guid("4bd2826e-54a1-4ba9-bf63-92b73ea1ac4a"));
+		private readonly LoggingChannel logging = new LoggingChannel("devMobile MQTT LoRa Field Gateway", null, new Guid("4bd2826e-54a1-4ba9-bf63-92b73ea1ac4a"));
 		private ApplicationSettings applicationSettings = null;
 		private IMqttClient mqttClient = null;
 		private IMqttClientOptions mqttOptions = null ;
@@ -203,7 +203,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			applicationBuildInformation.AddString("ApplicationVersion", string.Format($"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}"));
 			this.logging.LogEvent("Application starting", applicationBuildInformation, LoggingLevel.Information);
 
-			// Log the Azure connection string and associated settings
+			// Log the MQTT connection string and associated settings
 			LoggingFields mqttClientSettings = new LoggingFields();
 			mqttClientSettings.AddString("UserName", this.applicationSettings.UserName);
 			mqttClientSettings.AddString("Password", this.applicationSettings.Password);
@@ -386,7 +386,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #endif
 
 #if PAYLOAD_TEXT
-			await PayloadText(azureIoTHubClient, e);
+			await PayloadText(this.mqttClient, e);
 #endif
 
 #if PAYLOAD_TEXT_COMA_SEPARATED_VALUES
@@ -394,11 +394,11 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #endif
 
 #if PAYLOAD_BINARY_BINARY_CODED_DECIMAL
-			await PayloadBinaryCodedDecimal(azureIoTHubClient, e);
+			await PayloadBinaryCodedDecimal(this.mqttClient, e);
 #endif
 
 #if PAYLOAD_BINARY_CAYENNE_LOW_POWER_PAYLOAD
-			await PayloadProcessCayenneLowPowerPayload(azureIoTHubClient, e);
+			await PayloadProcessCayenneLowPowerPayload(this.mqttClient, e);
 #endif
 
 #if CLOUD2DEVICE_SEND
@@ -414,7 +414,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 		}
 
 #if PAYLOAD_TEXT
-		async Task PayloadText(DeviceClient azureIoTHubClient, Rfm9XDevice.OnDataReceivedEventArgs e)
+		async Task PayloadText(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 			JObject telemetryDataPoint = new JObject();
 			LoggingFields processLoggingFields = new LoggingFields();
@@ -545,7 +545,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #endif
 
 #if PAYLOAD_TEXT_BINARY_CODED_DECIMAL
-		async Task PayloadText(DeviceClient azureIoTHubClient, Rfm9XDevice.OnDataReceivedEventArgs e)
+		async Task PayloadText(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 			JObject telemetryDataPoint = new JObject();
 			LoggingFields processLoggingFields = new LoggingFields();
@@ -586,7 +586,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #endif
 
 #if PAYLOAD_BINARY_CAYENNE_LOW_POWER_PAYLOAD
-		void PayloadProcessCayenneLowPowerPayload(DeviceClient azureIoTHubClient, Rfm9XDevice.OnDataReceivedEventArgs e)
+		void PayloadProcessCayenneLowPowerPayload(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 		}
 #endif
