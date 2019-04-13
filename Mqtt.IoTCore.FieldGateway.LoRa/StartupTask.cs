@@ -24,15 +24,8 @@
 namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 {
 	using System;
-#if CLOUD2DEVICE_SEND
-	using System.Collections.Concurrent;
-#endif
 	using System.ComponentModel;
 	using System.Diagnostics;
-#if CLOUD_DEVICE_BOND || CLOUD_DEVICE_PUSH || CLOUD_DEVICE_SEND
-	using System.Globalization;
-	using System.Linq;
-#endif
 	using System.Text;
 	using System.Threading.Tasks;
 
@@ -47,9 +40,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 	using Windows.ApplicationModel.Background;
 	using Windows.Foundation.Diagnostics;
 	using Windows.Storage;
-	using Windows.Storage.Streams;
 	using Windows.System;
-	using Windows.System.Profile;
 
 	public sealed class StartupTask : IBackgroundTask
 	{
@@ -99,16 +90,11 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 		private const byte InterruptLine = 22;
 		private Rfm9XDevice rfm9XDevice = new Rfm9XDevice(ChipSelectPin.CS1, ResetLine, InterruptLine);
 #endif
-		private readonly TimeSpan DeviceRestartPeriod = new TimeSpan(0, 0, 25);
-
+		private readonly TimeSpan mqttReconnectDelay = new TimeSpan(0, 0, 5);
 		private readonly LoggingChannel logging = new LoggingChannel("devMobile MQTT LoRa Field Gateway", null, new Guid("4bd2826e-54a1-4ba9-bf63-92b73ea1ac4a"));
 		private ApplicationSettings applicationSettings = null;
 		private IMqttClient mqttClient = null;
 		private IMqttClientOptions mqttOptions = null ;
-
-		#if CLOUD2DEVICE_SEND
-		private ConcurrentDictionary<byte[], byte[]> sendMessageQueue = new ConcurrentDictionary<byte[], byte[]>();
-#endif
 		private BackgroundTaskDeferral deferral = null;
 
 		public void Run(IBackgroundTaskInstance taskInstance)
@@ -164,21 +150,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #if ADAFRUIT_RADIO_BONNET
 			applicationBuildInformation.AddString("Shield", "AdafruitRadioBonnet");
 #endif
-#if CLOUD_DEVICE_BOND
-			applicationBuildInformation.AddString("Bond", "Supported");
-#else
-			applicationBuildInformation.AddString("Bond", "NotSupported");
-#endif
-#if CLOUD_DEVICE_PUSH
-			applicationBuildInformation.AddString("Push", "Supported");
-#else
-			applicationBuildInformation.AddString("Push", "NotSupported");
-#endif
-#if CLOUD_DEVICE_SEND
-			applicationBuildInformation.AddString("Send", "Supported");
-#else
-			applicationBuildInformation.AddString("Send", "NotSupported");
-#endif
 #if PAYLOAD_TEXT
 			applicationBuildInformation.AddString("PayloadProcessor", "Text");
 #endif
@@ -204,22 +175,21 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			this.logging.LogEvent("Application starting", applicationBuildInformation, LoggingLevel.Information);
 
 			// Log the MQTT connection string and associated settings
-			LoggingFields mqttClientSettings = new LoggingFields();
-			mqttClientSettings.AddString("UserName", this.applicationSettings.UserName);
-			mqttClientSettings.AddString("Password", this.applicationSettings.Password);
-			mqttClientSettings.AddString("Server", this.applicationSettings.MqttServer);
-			//mqttClientSettings.AddString("AdaFruitIOGroupName", this.applicationSettings.AdaFruitIOGroupName);
-			mqttClientSettings.AddString("ClientID", this.applicationSettings.ClientID);
-			this.logging.LogEvent("MQTT client configuration", mqttClientSettings, LoggingLevel.Information);
+			LoggingFields mqttClientInformation = new LoggingFields();
+			mqttClientInformation.AddString("UserName", this.applicationSettings.MqttUserName);
+			mqttClientInformation.AddString("Password", this.applicationSettings.MqttPassword);
+			mqttClientInformation.AddString("Server", this.applicationSettings.MqttServer);
+			mqttClientInformation.AddString("ClientID", this.applicationSettings.MqttClientID);
+			this.logging.LogEvent("MQTT client configuration", mqttClientInformation, LoggingLevel.Information);
 
 			// Connect the MQTT brokwer so we are ready for messages
 			var factory = new MqttFactory();
 			this.mqttClient = factory.CreateMqttClient();
 
 			this.mqttOptions = new MqttClientOptionsBuilder()
-							.WithClientId(applicationSettings.ClientID)
+							.WithClientId(applicationSettings.MqttClientID)
 							.WithTcpServer(applicationSettings.MqttServer)
-							.WithCredentials(applicationSettings.UserName, applicationSettings.Password)
+							.WithCredentials(applicationSettings.MqttUserName, applicationSettings.MqttPassword)
 							.WithTls()
 							.Build();
 
@@ -229,66 +199,13 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			}
 			catch (Exception ex)
 			{
-				this.logging.LogMessage("IoT Hub connection failed " + ex.Message, LoggingLevel.Error);
+				mqttClientInformation.AddString("Exception", ex.ToString());
+				this.logging.LogMessage("MQTT Connect Async failed" + ex.Message, LoggingLevel.Error);
 				return;
 			}
 
+			// Wire up a handler for disconnect event for retry
 			this.mqttClient.Disconnected += MqttClient_Disconnected;
-
-			/*
-			// Wire up the field gateway restart method handler
-			try
-			{
-				azureIoTHubClient.SetMethodHandlerAsync("Restart", RestartAsync, null);
-			}
-			catch (Exception ex)
-			{
-				this.logging.LogMessage("Azure IoT Hub Restart method handler setup failed " + ex.Message, LoggingLevel.Error);
-				return;
-			}
-			*/
-			/*
-	#if CLOUD_DEVICE_BOND
-			// Wire up the bond device method handler
-			try
-			{
-				azureIoTHubClient.SetMethodHandlerAsync("DeviceBond", this.DeviceBondAsync, null);
-			}
-			catch (Exception ex)
-			{
-				this.logging.LogMessage("Azure IoT Hub Device Bond method handler setup failed " + ex.Message, LoggingLevel.Error);
-				return;
-			}
-	#endif
-	`		*/
-			/*
-	#if CLOUD_DEVICE_PUSH
-			// Wire up the push message to device method handler
-			try
-			{
-				this.azureIoTHubClient.SetMethodHandlerAsync("DevicePush", this.DevicePushAsync, null);
-			}
-			catch (Exception ex)
-			{
-				this.logging.LogMessage("Azure IoT Hub DevicePush method handler setup failed " + ex.Message, LoggingLevel.Error);
-				return;
-			}
-	#endif
-		*/
-			/*
-	#if CLOUD_DEVICE_SEND
-				// Wire up the send message to device method handler
-				try
-				{
-					this.azureIoTHubClient.SetMethodHandlerAsync("DeviceSend", this.DeviceSendAsync, null);
-				}
-				catch (Exception ex)
-				{
-					this.logging.LogMessage("Azure IoT Hub client DeviceSend method handler setup failed " + ex.Message, LoggingLevel.Error);
-					return;
-				}
-	#endif
-			*/
 
 			// Configure the LoRa module
 			rfm9XDevice.OnReceive += Rfm9XDevice_OnReceive;
@@ -361,15 +278,20 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 
 		private async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
 		{
-			await Task.Delay(TimeSpan.FromSeconds(5));
+			LoggingFields mqttConnectRetry = new LoggingFields();
+
+			mqttConnectRetry.AddString("InitialException", e.Exception.ToString());
+			await Task.Delay(mqttReconnectDelay);
 
 			try
 			{
 				await mqttClient.ConnectAsync(this.mqttOptions);
+				this.logging.LogEvent("MQTT reconnect success", mqttConnectRetry, LoggingLevel.Information);
 			}
-			catch
+			catch (Exception ex)
 			{
-				Console.WriteLine("### RECONNECTING FAILED ###");
+				mqttConnectRetry.AddString("RetryException", ex.ToString());
+				this.logging.LogEvent("MQTT reconnect failure", mqttConnectRetry, LoggingLevel.Error);
 			}
 		}
 
@@ -400,17 +322,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #if PAYLOAD_BINARY_CAYENNE_LOW_POWER_PAYLOAD
 			await PayloadProcessCayenneLowPowerPayload(this.mqttClient, e);
 #endif
-
-#if CLOUD2DEVICE_SEND
-			// see if there are any outstand messages to reply to device with
-			byte[] responseMessage;
-
-			if (sendMessageQueue.TryGetValue( e.Address, out responseMessage))
-			{
-				rfm9XDevice.Send(e.Address, responseMessage);
-				this.logging.LogMessage("Response message sent", LoggingLevel.Information);
-			}
-#endif
 		}
 
 #if PAYLOAD_TEXT
@@ -418,6 +329,8 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 		{
 			JObject telemetryDataPoint = new JObject();
 			LoggingFields processLoggingFields = new LoggingFields();
+			char[] sensorReadingSeparators = { ',' };
+			char[] sensorIdAndValueSeparators = { ' ' };
 
 			processLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
 			telemetryDataPoint.Add("PacketSNR", e.PacketSnr.ToString("F1"));
@@ -431,30 +344,43 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			processLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
 			telemetryDataPoint.Add("DeviceAddressBCD", addressBcdText);
 
-			string messageBcdText = BitConverter.ToString(e.Data);
-			processLoggingFields.AddInt32("MessageLength", e.Data.Length);
-			processLoggingFields.AddString("MessageBCD", messageBcdText);
+			string messageText;
+			try
+			{
+				messageText = UTF8Encoding.UTF8.GetString(e.Data);
+				processLoggingFields.AddString("MessageText", messageText);
+			}
+			catch (Exception ex)
+			{
+				processLoggingFields.AddString("Exception", ex.ToString());
+				this.logging.LogEvent("PayloadProcess failure converting payload to text", processLoggingFields, LoggingLevel.Warning);
+				return;
+			}
+
+			string topic = string.Empty;
 
 			try
 			{
-				string messageText = UTF8Encoding.UTF8.GetString(e.Data);
-				processLoggingFields.AddString("MessageText", messageText);
-				telemetryDataPoint.Add("Payload", messageText);
+				topic = string.Format(this.applicationSettings.MqttTopicFormat, applicationSettings.MqttUserName, addressBcdText.ToLower());
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				this.logging.LogEvent("PayloadProcess failure converting payload to text", processLoggingFields, LoggingLevel.Warning);
+				processLoggingFields.AddString("Exception", ex.ToString());
+				this.logging.LogEvent("Format topic", processLoggingFields, LoggingLevel.Warning);
 				return;
 			}
 
 			try
 			{
-				using (Message message = new Message(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(telemetryDataPoint))))
-				{
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync start", DateTime.UtcNow);
-					await this.azureIoTHubClient.SendEventAsync(message);
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync finish", DateTime.UtcNow);
-				}
+				var message = new MqttApplicationMessageBuilder()
+								.WithTopic(topic)
+								.WithPayload(messageText)
+								.WithExactlyOnceQoS()
+								.WithRetainFlag()
+								.Build();
+				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
+				await mqttClient.PublishAsync(message);
+				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
 				this.logging.LogEvent("SendEventAsync Text payload", processLoggingFields, LoggingLevel.Information);
 			}
 			catch (Exception ex)
@@ -491,8 +417,9 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 				messageText = UTF8Encoding.UTF8.GetString(e.Data);
 				processLoggingFields.AddString("MessageText", messageText);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				processLoggingFields.AddString("Exception", ex.ToString());
 				this.logging.LogEvent("PayloadProcess failure converting payload to text", processLoggingFields, LoggingLevel.Warning);
 				return;
 			}
@@ -519,8 +446,18 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 
 				string sensorId = sensorIdAndValue[0];
 				string value = sensorIdAndValue[1];
+				string topic = string.Empty;
 
-				string topic = string.Format(this.applicationSettings.MqttTopicFormat, applicationSettings.UserName, addressBcdText.ToLower(), sensorId.ToLower());
+				try
+				{
+					topic = string.Format(this.applicationSettings.MqttTopicFormat, applicationSettings.MqttUserName, addressBcdText.ToLower(), sensorId.ToLower());
+				}
+				catch (Exception ex)
+				{
+					processLoggingFields.AddString("Exception", ex.ToString());
+					this.logging.LogEvent("Format MQTT topic", processLoggingFields, LoggingLevel.Warning);
+					return;
+				}
 
 				try
 				{
@@ -530,9 +467,9 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 									.WithExactlyOnceQoS()
 									.WithRetainFlag()
 									.Build();
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync start", DateTime.UtcNow);
+					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
 					await mqttClient.PublishAsync(message);
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync finish", DateTime.UtcNow);
+					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
 					this.logging.LogEvent("SendEventAsync CSV payload", processLoggingFields, LoggingLevel.Information);
 				}
 				catch (Exception ex)
@@ -547,41 +484,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 #if PAYLOAD_TEXT_BINARY_CODED_DECIMAL
 		async Task PayloadText(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
-			JObject telemetryDataPoint = new JObject();
-			LoggingFields processLoggingFields = new LoggingFields();
-
-			processLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
-			telemetryDataPoint.Add("PacketSNR", e.PacketSnr.ToString("F1"));
-			processLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
-			telemetryDataPoint.Add("PacketRSSI", e.PacketRssi);
-			processLoggingFields.AddInt32("RSSI", e.Rssi);
-			telemetryDataPoint.Add("RSSI", e.Rssi);
-
-			string addressBcdText = BitConverter.ToString(e.Address);
-			processLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
-			processLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
-			telemetryDataPoint.Add("DeviceAddressBCD", addressBcdText);
-
-			string messageBcdText = BitConverter.ToString(e.Data);
-			processLoggingFields.AddInt32("MessageLength", e.Data.Length);
-			processLoggingFields.AddString("MessageBCD", messageBcdText);
-			telemetryDataPoint.Add("Payload", messageBcdText);
-
-			try
-			{
-				using (Message message = new Message(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(telemetryDataPoint))))
-				{
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync start", DateTime.UtcNow);
-					await this.azureIoTHubClient.SendEventAsync(message);
-					Debug.WriteLine(" {0:HH:mm:ss} AzureIoTHubClient SendEventAsync finish", DateTime.UtcNow);
-				}
-				this.logging.LogEvent("SendEventAsync BCD payload", processLoggingFields, LoggingLevel.Information);
-			}
-			catch (Exception ex)
-			{
-				processLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("SendEventAsync Text payload", processLoggingFields, LoggingLevel.Error);
-			}
 		}
 #endif
 
@@ -597,16 +499,16 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			public string MqttServer { get; set; }
 
 			[JsonProperty("MQTTUserName", Required = Required.Always)]
-			public string UserName { get; set; }
+			public string MqttUserName { get; set; }
 
 			[JsonProperty("MQTTPassword", Required = Required.Always)]
-			public string Password { get; set; }
+			public string MqttPassword { get; set; }
 
 			[JsonProperty("MQTTTopicFormat", Required = Required.Always)]
 			public string MqttTopicFormat { get; set; }
 
 			[JsonProperty("MQTTClientID", Required = Required.Always)]
-			public string ClientID { get; set; }
+			public string MqttClientID { get; set; }
 
 			// LoRa configuration parameters
 			[JsonProperty("Address", Required = Required.Always)]
