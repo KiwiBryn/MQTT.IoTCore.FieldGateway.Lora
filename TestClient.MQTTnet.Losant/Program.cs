@@ -72,18 +72,23 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				.WithTls()
 				.Build();
 
+			mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
 			mqttClient.Disconnected += MqttClient_Disconnected;
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
-			// Adafruit.IO format for topics which are called feeds
-			string feedname = $"losant/{clientId}/state";
+			string commandTopic = $"losant/{clientId}/command";
+
+			// Setup a subscription
+			mqttClient.SubscribeAsync(commandTopic);
+
+			string stateTopic = $"losant/{clientId}/state";
 
 			while (true)
 			{
 				string payloadText;
 				double temperature = 22.0 + +(DateTime.UtcNow.Millisecond / 1000.0);
 				double humidity = 50 + +(DateTime.UtcNow.Millisecond / 1000.0);
-				Console.WriteLine($"Feed {feedname}  Temperature:{temperature} Humidity:{humidity}");
+				Console.WriteLine($"Topic:{stateTopic} Temperature:{temperature} Humidity:{humidity} HeatPumpOn:{heatPumpOn}");
 
 				// First attempt which worked
 				//payloadText = @"{ ""data"":{ ""OfficeTemperature"":22.5}}";
@@ -96,8 +101,8 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
 
 				JObject data = new JObject();
-				data.Add("OfficeTemperature", temperature);
-				data.Add("OfficeHumidity", humidity);
+				data.Add("OfficeTemperature", temperature.ToString("F1"));
+				data.Add("OfficeHumidity", humidity.ToString("F0"));
 
 				data.Add("HeatPumpOn", heatPumpOn);
 				heatPumpOn = !heatPumpOn;
@@ -106,7 +111,7 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				payloadText = JsonConvert.SerializeObject(payloadJObject);
 
 				var message = new MqttApplicationMessageBuilder()
-					.WithTopic(feedname)
+					.WithTopic(stateTopic)
 					.WithPayload(payloadText)
 					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
 				//.WithExactlyOnceQoS() With Losant this caused the publish to hang
@@ -120,6 +125,11 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 
 				Thread.Sleep(30100);
 			}
+		}
+
+		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		{
+			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
 		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
