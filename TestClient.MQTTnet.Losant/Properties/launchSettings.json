@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestClient.MQTTnet.Losant": {
+      "commandName": "Project",
+      "commandLineArgs": "broker.losant.com 87e96e8d-03f4-4055-a51c-5fcfd11503f0 eaf48609b93eea147505be6e310764874f19375e84a0d9600453c6f3c06a30e4 5cbbfa0ff3bb3d0009bfafcd"
+    }
+  }
+}

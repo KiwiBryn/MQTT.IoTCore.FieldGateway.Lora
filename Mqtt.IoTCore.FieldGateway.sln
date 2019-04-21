@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mqtt.TestClient.AdaFruit", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.MyDevicesCayenne", "TestClient.MQTTnet.MyDevicesCayenne\TestClient.MQTTnet.MyDevicesCayenne.csproj", "{4714CA42-BA37-4CE3-ABAC-0B727FBD4F53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.AdafruitIO", "TestClient.MQTTnet.AdafruitIO\TestClient.MQTTnet.AdafruitIO.csproj", "{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.AdafruitIO", "TestClient.MQTTnet.AdafruitIO\TestClient.MQTTnet.AdafruitIO.csproj", "{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.Losant", "TestClient.MQTTnet.Losant\TestClient.MQTTnet.Losant.csproj", "{34BA1B1D-B857-4326-A211-39A321B85FED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,22 @@ Global
 		{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}.Release|x64.Build.0 = Release|Any CPU
 		{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}.Release|x86.ActiveCfg = Release|Any CPU
 		{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}.Release|x86.Build.0 = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|ARM.Build.0 = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|x64.Build.0 = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Debug|x86.Build.0 = Debug|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|ARM.ActiveCfg = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|ARM.Build.0 = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|x64.ActiveCfg = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|x64.Build.0 = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|x86.ActiveCfg = Release|Any CPU
+		{34BA1B1D-B857-4326-A211-39A321B85FED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
