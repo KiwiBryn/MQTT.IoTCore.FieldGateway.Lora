@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.MyDevice
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.AdafruitIO", "TestClient.MQTTnet.AdafruitIO\TestClient.MQTTnet.AdafruitIO.csproj", "{B29865D6-5F41-4ED6-B05B-0A1DE4B2AFDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.Losant", "TestClient.MQTTnet.Losant\TestClient.MQTTnet.Losant.csproj", "{34BA1B1D-B857-4326-A211-39A321B85FED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.Losant", "TestClient.MQTTnet.Losant\TestClient.MQTTnet.Losant.csproj", "{34BA1B1D-B857-4326-A211-39A321B85FED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
