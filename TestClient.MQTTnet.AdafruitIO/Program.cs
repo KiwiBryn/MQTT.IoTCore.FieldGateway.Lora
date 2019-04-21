@@ -21,15 +21,16 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 A quick and dirty test client to explore how MyDevice Cayenne connectivity works
-	 with the MQTTnet library
+	 A quick and dirty test client to explore how Adafruit.IO MQTT connectivity with 
+	 the MQTTnet library works
  */
-namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
+namespace devmobile.Mqtt.TestClient.MQTTnet.AdafruitIO
 {
 	using System;
 	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
+
 	using global::MQTTnet;
 	using global::MQTTnet.Client;
 
@@ -37,32 +38,20 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 	{
 		private static IMqttClient mqttClient = null;
 		private static IMqttClientOptions mqttOptions = null;
-		private static string server;
-		private static string username;
-		private static string password;
-		private static string clientId;
-		private static string Channel;
 
 		static void Main(string[] args)
 		{
 			MqttFactory factory = new MqttFactory();
 			mqttClient = factory.CreateMqttClient();
 
-			if (args.Length != 5)
+			if (args.Length != 4)
 			{
-				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [Channel]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID]");
 				Console.WriteLine("Press <enter> to exit");
 				Console.ReadLine();
-				return;
 			}
 
-			server = args[0];
-			username = args[1];
-			password = args[2];
-			clientId = args[3];
-			Channel = args[4];
-
-			Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Channel:{Channel}");
+			Console.WriteLine($"MQTT Server:{args[0]} Username:{args[1]} ClientID:{args[3]}");
 
 			mqttOptions = new MqttClientOptionsBuilder()
 				.WithTcpServer(args[0])
@@ -71,22 +60,23 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 				.WithTls()
 				.Build();
 
-			mqttClient.ConnectAsync(mqttOptions).Wait();
 			mqttClient.Disconnected += MqttClient_Disconnected;
+			mqttClient.ConnectAsync(mqttOptions).Wait();
 
-			string topicTemperatureData = $"v1/{username}/things/{clientId}/data/{Channel}";
+			// Adafruit.IO format for topics which are called feeds
+			string feedname = $"{args[1]}/feeds/105windermere.officetemperature";
 
 			while (true)
 			{
 				string value = "22." + DateTime.UtcNow.Millisecond.ToString();
-				Console.WriteLine($"Feed {topicTemperatureData}  Value {value}");
+				Console.WriteLine($"Feed {feedname}  Value {value}");
 
 				var message = new MqttApplicationMessageBuilder()
-					.WithTopic(topicTemperatureData)
+					.WithTopic(feedname)
 					.WithPayload(value)
 					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-					//.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce) // Causes publish to hang
-					.WithRetainFlag()
+				.WithExactlyOnceQoS()
+				.WithRetainFlag()
 				.Build();
 
 				Console.WriteLine("PublishAsync start");

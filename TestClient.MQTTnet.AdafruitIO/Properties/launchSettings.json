@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestClient.MQTTnet.AdafruitIO": {
+      "commandName": "Project",
+      "commandLineArgs": "io.adafruit.com BrynHLewis  863603aef5f940bca1e7132b339389ab \".Net Adafruit Client\" "
+    }
+  }
+}
