@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 A quick and dirty test client to explore how Adafruit.IO MQTT connectivity with 
+	 A quick and dirty test client to explore how Losant MQTT connectivity with 
 	 the MQTTnet library works
 */
 namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
