@@ -37,25 +37,48 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 	{
 		private static IMqttClient mqttClient = null;
 		private static IMqttClientOptions mqttOptions = null;
+		private static string server;
+		private static string username;
+		private static string password;
+		private static string clientId;
+		private static string groupname;
+		private static string feedname;
 
 		static void Main(string[] args)
 		{
 			MqttFactory factory = new MqttFactory();
 			mqttClient = factory.CreateMqttClient();
 
-			if (args.Length != 4)
+			if ((args.Length != 5) && (args.Length != 6))
 			{
-				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [GroupName] [FeedName]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [FeedName]");
 				Console.WriteLine("Press <enter> to exit");
 				Console.ReadLine();
+				return;
 			}
 
-			Console.WriteLine($"MQTT Server:{args[0]} Username:{args[1]} ClientID:{args[3]}");
+			server = args[0];
+			username = args[1];
+			password = args[2];
+			clientId = args[3];
+			if (args.Length == 5)
+			{
+				feedname = args[4].ToLower();
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Feedname:{feedname}");
+			}
+
+			if (args.Length == 6)
+			{
+				groupname = args[4].ToLower();
+				feedname = args[5].ToLower();
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Groupname:{groupname} Feedname:{feedname}");
+			}
 
 			mqttOptions = new MqttClientOptionsBuilder()
-				.WithTcpServer(args[0])
-				.WithCredentials(args[1], args[2])
-				.WithClientId(args[3])
+				.WithTcpServer(server)
+				.WithCredentials(username, password)
+				.WithClientId(clientId)
 				.WithTls()
 				.Build();
 
@@ -63,15 +86,25 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
 			// Adafruit.IO format for topics which are called feeds
-			string feedname = $"{args[1]}/feeds/105windermere.officetemperature";
+			string topic = string.Empty;
+
+			if (args.Length == 5)
+			{
+				topic = $"{args[1]}/feeds/{feedname}";
+			}
+
+			if (args.Length == 6)
+			{
+				topic = $"{args[1]}/feeds/{groupname}.{feedname}";
+			}
 
 			while (true)
 			{
 				string value = "22." + DateTime.UtcNow.Millisecond.ToString();
-				Console.WriteLine($"Feed {feedname}  Value {value}");
+				Console.WriteLine($"Topic:{topic} Value:{value}");
 
 				var message = new MqttApplicationMessageBuilder()
-					.WithTopic(feedname)
+					.WithTopic(topic)
 					.WithPayload(value)
 					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
 				.WithExactlyOnceQoS()
