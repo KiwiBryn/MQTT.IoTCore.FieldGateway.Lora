@@ -2,7 +2,7 @@
   "profiles": {
     "TestClient.MQTTnet.MyDevicesCayenne": {
       "commandName": "Project",
-      "commandLineArgs": "mqtt.mydevices.com \"63b52ef0-0d85-11e8-9f2a-b3b29283a596\" \"00d5775aa35f8fbfadf72c73e6532e707d451beb\" \"683d1730-6284-11e9-888e-af3db3cb8c63\" 100"
+      "commandLineArgs": "mqtt.mydevices.com \"63b52ef0-0d85-11e8-9f2a-b3b29283a596\" \"00d5775aa35f8fbfadf72c73e6532e707d451beb\" \"683d1730-6284-11e9-888e-af3db3cb8c63\" 1 10"
     }
   }
 }

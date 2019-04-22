@@ -41,16 +41,18 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 		private static string username;
 		private static string password;
 		private static string clientId;
-		private static string Channel;
+		private static string channelData;
+		private static string channelSubscribe;
 
 		static void Main(string[] args)
 		{
 			MqttFactory factory = new MqttFactory();
 			mqttClient = factory.CreateMqttClient();
 
-			if (args.Length != 5)
+			if ((args.Length != 5) && (args.Length != 6))
 			{
 				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [Channel]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [ChannelData] [ChannelSubscribe]");
 				Console.WriteLine("Press <enter> to exit");
 				Console.ReadLine();
 				return;
@@ -60,26 +62,49 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 			username = args[1];
 			password = args[2];
 			clientId = args[3];
-			Channel = args[4];
+			channelData = args[4];
 
-			Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Channel:{Channel}");
+			if (args.Length == 5)
+			{
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} ChannelData:{channelData}");
+			}
+
+			if (args.Length == 6)
+			{
+				channelSubscribe = args[5];
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} ChannelData:{channelData} ChannelSubscribe:{channelSubscribe}");
+			}
 
 			mqttOptions = new MqttClientOptionsBuilder()
-				.WithTcpServer(args[0])
-				.WithCredentials(args[1], args[2])
-				.WithClientId(args[3])
+				.WithTcpServer(server)
+				.WithCredentials(username, password)
+				.WithClientId(clientId)
 				.WithTls()
 				.Build();
 
 			mqttClient.ConnectAsync(mqttOptions).Wait();
+
+			if (args.Length == 6)
+			{
+				string topic = $"v1/{username}/things/{clientId}/cmd/{channelSubscribe}";
+
+				Console.WriteLine($"Subscribe Topic:{topic}");
+
+				mqttClient.SubscribeAsync(topic).Wait();
+				// mqttClient.SubscribeAsync(topic, global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).Wait(); 
+				// Thought this might help with subscription but it didn't, looks like ACK might be broken in MQTTnet
+				mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
+			}
 			mqttClient.Disconnected += MqttClient_Disconnected;
 
-			string topicTemperatureData = $"v1/{username}/things/{clientId}/data/{Channel}";
+			string topicTemperatureData = $"v1/{username}/things/{clientId}/data/{channelData}";
+
+			Console.WriteLine();
 
 			while (true)
 			{
 				string value = "22." + DateTime.UtcNow.Millisecond.ToString();
-				Console.WriteLine($"Feed {topicTemperatureData}  Value {value}");
+				Console.WriteLine($"Publish Topic {topicTemperatureData}  Value {value}");
 
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(topicTemperatureData)
@@ -92,9 +117,16 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 				Console.WriteLine("PublishAsync start");
 				mqttClient.PublishAsync(message).Wait();
 				Console.WriteLine("PublishAsync finish");
+				Console.WriteLine();
 
 				Thread.Sleep(30100);
 			}
+		}
+
+		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		{
+			Console.WriteLine($"ApplicationMessageReceived ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Qos:{e.ApplicationMessage.QualityOfServiceLevel} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
+			Console.WriteLine();
 		}
 
 		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
