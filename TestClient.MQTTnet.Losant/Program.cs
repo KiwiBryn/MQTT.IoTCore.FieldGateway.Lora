@@ -76,11 +76,11 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 			mqttClient.Disconnected += MqttClient_Disconnected;
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
+			// Setup a subscription for commands sent to client
 			string commandTopic = $"losant/{clientId}/command";
-
-			// Setup a subscription
 			mqttClient.SubscribeAsync(commandTopic);
 
+			// Losant formatted client state update topic
 			string stateTopic = $"losant/{clientId}/state";
 
 			while (true)
@@ -91,24 +91,32 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				Console.WriteLine($"Topic:{stateTopic} Temperature:{temperature} Humidity:{humidity} HeatPumpOn:{heatPumpOn}");
 
 				// First attempt which worked
-				//payloadText = @"{ ""data"":{ ""OfficeTemperature"":22.5}}";
+				payloadText = @"{""data"":{ ""OfficeTemperature"":22.5}}";
 
 				// Second attempt to work out data format with "real" values injected
-				//payloadText = @"{ ""data"":{ ""OfficeTemperature"":"+ temperature.ToString("f1") + @",""OfficeHumidity"":" + humidity.ToString("F0") + @"}}";
+				//payloadText = @"{""data"":{ ""OfficeTemperature"":"+ temperature.ToString("f1") + @",""OfficeHumidity"":" + humidity.ToString("F0") + @"}}";
 
 				// Third attempt with Jobject which sort of worked but number serialisation is sub optimal
-				JObject payloadJObject = new JObject(); 
-				payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
+				//JObject payloadJObject = new JObject(); 
+				//payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
 
-				JObject data = new JObject();
-				data.Add("OfficeTemperature", temperature.ToString("F1"));
-				data.Add("OfficeHumidity", humidity.ToString("F0"));
+				//JObject data = new JObject();
+				//data.Add("OfficeTemperature", temperature.ToString("F1"));
+				//data.Add("OfficeHumidity", humidity.ToString("F0"));
 
-				data.Add("HeatPumpOn", heatPumpOn);
-				heatPumpOn = !heatPumpOn;
-				payloadJObject.Add( "data", data);
+				//data.Add("HeatPumpOn", heatPumpOn);
+				//heatPumpOn = !heatPumpOn;
+				//payloadJObject.Add( "data", data);
 
-				payloadText = JsonConvert.SerializeObject(payloadJObject);
+				//payloadText = JsonConvert.SerializeObject(payloadJObject);
+
+				// Forth attempt with JOBject and gps info https://docs.losant.com/devices/state/
+				//JObject payloadJObject = new JObject(); 
+				//payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
+				//JObject data = new JObject();
+				//data.Add("GPS", "-43.5309325, 172.637119"); // Christchurch Cathederal
+				//payloadJObject.Add("data", data);
+				//payloadText = JsonConvert.SerializeObject(payloadJObject);
 
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
