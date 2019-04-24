@@ -56,6 +56,7 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID]");
 				Console.WriteLine("Press <enter> to exit");
 				Console.ReadLine();
+				return;
 			}
 
 			server = args[0];
