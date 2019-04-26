@@ -26,6 +26,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 	using System;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Reflection;
 	using System.Text;
 	using System.Threading.Tasks;
 
@@ -35,7 +36,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 	using MQTTnet.Client;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
-	using Newtonsoft.Json.Linq;
 	using Windows.ApplicationModel;
 	using Windows.ApplicationModel.Background;
 	using Windows.Foundation.Diagnostics;
@@ -93,6 +93,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 		private readonly TimeSpan mqttReconnectDelay = new TimeSpan(0, 0, 5);
 		private readonly LoggingChannel logging = new LoggingChannel("devMobile MQTT LoRa Field Gateway", null, new Guid("4bd2826e-54a1-4ba9-bf63-92b73ea1ac4a"));
 		private ApplicationSettings applicationSettings = null;
+		private IMessageHandler messageHandler = null;
 		private IMqttClient mqttClient = null;
 		private IMqttClientOptions mqttOptions = null ;
 		private BackgroundTaskDeferral deferral = null;
@@ -182,19 +183,19 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			mqttClientInformation.AddString("ClientID", this.applicationSettings.MqttClientID);
 			this.logging.LogEvent("MQTT client configuration", mqttClientInformation, LoggingLevel.Information);
 
-			// Connect the MQTT brokwer so we are ready for messages
+			// Connect the MQTT broker so we are ready for messages
 			var factory = new MqttFactory();
 			this.mqttClient = factory.CreateMqttClient();
 
-			this.mqttOptions = new MqttClientOptionsBuilder()
+			try
+			{ 
+				this.mqttOptions = new MqttClientOptionsBuilder()
 							.WithClientId(applicationSettings.MqttClientID)
 							.WithTcpServer(applicationSettings.MqttServer)
 							.WithCredentials(applicationSettings.MqttUserName, applicationSettings.MqttPassword)
 							.WithTls()
 							.Build();
 
-			try
-			{
 				this.mqttClient.ConnectAsync(this.mqttOptions).Wait();
 			}
 			catch (Exception ex)
@@ -205,7 +206,29 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			}
 
 			// Wire up a handler for disconnect event for retry
+			this.mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
 			this.mqttClient.Disconnected += MqttClient_Disconnected;
+
+			// Load up the message handler assembly
+			try
+			{
+				Assembly assembly = Assembly.Load(applicationSettings.MessageHandlerAssembly);
+
+				messageHandler = (IMessageHandler)assembly.CreateInstance("devMobile.Mqtt.IoTCore.FieldGateway.MessageHandler");
+				if (messageHandler == null)
+				{
+					this.logging.LogMessage("MessageHandler assembly load failed", LoggingLevel.Error);
+					return;
+				}
+
+				messageHandler.Initialise(logging, mqttClient, rfm9XDevice);
+			}
+			catch (Exception ex)
+			{
+				mqttClientInformation.AddString("Exception", ex.ToString());
+				this.logging.LogMessage("MessageHandler Initialise failed" + ex.Message, LoggingLevel.Error);
+				return;
+			}
 
 			// Configure the LoRa module
 			rfm9XDevice.OnReceive += Rfm9XDevice_OnReceive;
@@ -286,212 +309,92 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			try
 			{
 				await mqttClient.ConnectAsync(this.mqttOptions);
-				this.logging.LogEvent("MQTT reconnect success", mqttConnectRetry, LoggingLevel.Information);
+				this.logging.LogEvent("MqttClient_Disconnected reconnect success", mqttConnectRetry, LoggingLevel.Information);
 			}
 			catch (Exception ex)
 			{
 				mqttConnectRetry.AddString("RetryException", ex.ToString());
-				this.logging.LogEvent("MQTT reconnect failure", mqttConnectRetry, LoggingLevel.Error);
+				this.logging.LogEvent("MqttClient_Disconnected reconnect failure", mqttConnectRetry, LoggingLevel.Error);
 			}
+		}
+
+		private void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		{
+			LoggingFields messageHandlerLoggingFields = new LoggingFields();
+#if DEBUG
+			Debug.WriteLine($"{DateTime.UtcNow:HH:mm:ss}-MqttClient_ApplicationMessageReceived ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
+#endif
+			messageHandlerLoggingFields.AddString("ClientId", e.ClientId);
+			messageHandlerLoggingFields.AddString("Topic", e.ApplicationMessage.Topic);
+			messageHandlerLoggingFields.AddString("Payload", e.ApplicationMessage.ConvertPayloadToString());
+
+			if (messageHandler != null)
+			{
+				try
+				{
+					messageHandler.ProcessTransmit(sender, e);
+				}
+				catch (Exception ex)
+				{
+					messageHandlerLoggingFields.AddString("Exception", ex.ToString());
+					this.logging.LogEvent("MqttClient_ApplicationMessageReceived MessageHandler", messageHandlerLoggingFields, LoggingLevel.Error);
+					return;
+				}
+			}
+			this.logging.LogEvent("MqttClient_ApplicationMessageReceived", messageHandlerLoggingFields, LoggingLevel.Information);
 		}
 
 		private void Rfm9XDevice_OnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
 		{
-			Debug.WriteLine("Rfm9XDevice_OnTransmit");
-			this.logging.LogMessage("Rfm9XDevice_OnTransmit", LoggingLevel.Information);
-		}
-
-		private async void Rfm9XDevice_OnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
+			LoggingFields messageHandlerLoggingFields = new LoggingFields();
 #if DEBUG
-			Debug.WriteLine(@"{0:HH:mm:ss}-RX From {1} PacketSnr {2:0.0} Packet RSSI {3}dBm RSSI {4}dBm = {5} byte message", DateTime.UtcNow, BitConverter.ToString(e.Address), e.PacketSnr, e.PacketRssi, e.Rssi, e.Data.Length);
+			Debug.WriteLine($"{DateTime.UtcNow:HH:mm:ss}-Rfm9XDevice_OnTransmit");
 #endif
-
-#if PAYLOAD_TEXT
-			await PayloadText(this.mqttClient, e);
-#endif
-
-#if PAYLOAD_TEXT_COMA_SEPARATED_VALUES
-			await PayloadCommaSeparatedValues(this.mqttClient, e);
-#endif
-
-#if PAYLOAD_BINARY_BINARY_CODED_DECIMAL
-			await PayloadBinaryCodedDecimal(this.mqttClient, e);
-#endif
-
-#if PAYLOAD_BINARY_CAYENNE_LOW_POWER_PAYLOAD
-			await PayloadProcessCayenneLowPowerPayload(this.mqttClient, e);
-#endif
-		}
-
-#if PAYLOAD_TEXT
-		async Task PayloadText(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
-			JObject telemetryDataPoint = new JObject();
-			LoggingFields processLoggingFields = new LoggingFields();
-			char[] sensorReadingSeparators = { ',' };
-			char[] sensorIdAndValueSeparators = { ' ' };
-
-			processLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
-			telemetryDataPoint.Add("PacketSNR", e.PacketSnr.ToString("F1"));
-			processLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
-			telemetryDataPoint.Add("PacketRSSI", e.PacketRssi);
-			processLoggingFields.AddInt32("RSSI", e.Rssi);
-			telemetryDataPoint.Add("RSSI", e.Rssi);
-
-			string addressBcdText = BitConverter.ToString(e.Address);
-			processLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
-			processLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
-			telemetryDataPoint.Add("DeviceAddressBCD", addressBcdText);
-
-			string messageText;
-			try
+			if (messageHandler != null)
 			{
-				messageText = UTF8Encoding.UTF8.GetString(e.Data);
-				processLoggingFields.AddString("MessageText", messageText);
-			}
-			catch (Exception ex)
-			{
-				processLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("PayloadProcess failure converting payload to text", processLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-
-			string topic = string.Empty;
-
-			try
-			{
-				topic = string.Format(this.applicationSettings.MqttTopicFormat, applicationSettings.MqttUserName, addressBcdText.ToLower());
-			}
-			catch (Exception ex)
-			{
-				processLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("Format topic", processLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-
-			try
-			{
-				var message = new MqttApplicationMessageBuilder()
-								.WithTopic(topic)
-								.WithPayload(messageText)
-								.WithExactlyOnceQoS()
-								.WithRetainFlag()
-								.Build();
-				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
-				await mqttClient.PublishAsync(message);
-				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
-				this.logging.LogEvent("SendEventAsync Text payload", processLoggingFields, LoggingLevel.Information);
-			}
-			catch (Exception ex)
-			{
-				processLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("SendEventAsync Text payload", processLoggingFields, LoggingLevel.Error);
-			}
-		}
-#endif
-
-#if PAYLOAD_TEXT_COMA_SEPARATED_VALUES
-		private async Task PayloadCommaSeparatedValues(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
-			JObject telemetryDataPoint = new JObject();
-			LoggingFields processLoggingFields = new LoggingFields();
-			char[] sensorReadingSeparators = { ',' };
-			char[] sensorIdAndValueSeparators = { ' ' };
-
-			processLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
-			telemetryDataPoint.Add("PacketSNR", e.PacketSnr.ToString("F1"));
-			processLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
-			telemetryDataPoint.Add("PacketRSSI", e.PacketRssi);
-			processLoggingFields.AddInt32("RSSI", e.Rssi);
-			telemetryDataPoint.Add("RSSI", e.Rssi);
-
-			string addressBcdText = BitConverter.ToString(e.Address);
-			processLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
-			processLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
-			telemetryDataPoint.Add("DeviceAddressBCD", addressBcdText);
-
-			string messageText;
-			try
-			{
-				messageText = UTF8Encoding.UTF8.GetString(e.Data);
-				processLoggingFields.AddString("MessageText", messageText);
-			}
-			catch (Exception ex)
-			{
-				processLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("PayloadProcess failure converting payload to text", processLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-
-			// Chop up the CSV text
-			string[] sensorReadings = messageText.Split(sensorReadingSeparators, StringSplitOptions.RemoveEmptyEntries);
-			if (sensorReadings.Length < 1)
-			{
-				this.logging.LogEvent("PayloadProcess payload contains no sensor readings", processLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-
-			// Chop up each sensor read into an ID & value
-			foreach (string sensorReading in sensorReadings)
-			{
-				string[] sensorIdAndValue = sensorReading.Split(sensorIdAndValueSeparators, StringSplitOptions.RemoveEmptyEntries);
-
-				// Check that there is an id & value
-				if (sensorIdAndValue.Length != 2)
-				{
-					this.logging.LogEvent("PayloadProcess payload invalid format", processLoggingFields, LoggingLevel.Warning);
-					return;
-				}
-
-				string sensorId = sensorIdAndValue[0];
-				string value = sensorIdAndValue[1];
-				string topic = string.Empty;
-
 				try
 				{
-					topic = string.Format(this.applicationSettings.MqttTopicFormat, applicationSettings.MqttUserName, addressBcdText.ToLower(), sensorId.ToLower());
+					messageHandler.OnTransmit(sender, e);
 				}
 				catch (Exception ex)
 				{
-					processLoggingFields.AddString("Exception", ex.ToString());
-					this.logging.LogEvent("Format MQTT topic", processLoggingFields, LoggingLevel.Warning);
+					messageHandlerLoggingFields.AddString("Exception", ex.ToString());
+					this.logging.LogEvent("Rfm9XDevice_OnTransmit MessageHandler", messageHandlerLoggingFields, LoggingLevel.Error);
 					return;
 				}
+			}
+			this.logging.LogEvent("Rfm9XDevice_OnTransmit", messageHandlerLoggingFields, LoggingLevel.Information);
+		}
 
+		private void Rfm9XDevice_OnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
+		{
+			LoggingFields messageHandlerLoggingFields = new LoggingFields();
+#if DEBUG
+			Debug.WriteLine($"{DateTime.UtcNow:HH:mm:ss}-OnReceive From:{BitConverter.ToString(e.Address)} PacketSnr:{e.PacketSnr:0.0} Packet RSSI:{e.PacketRssi}dBm RSSI:{e.Rssi}dBm Length:{e.Data.Length}");
+#endif
+			messageHandlerLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
+			messageHandlerLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
+			messageHandlerLoggingFields.AddInt32("RSSI", e.Rssi);
+
+			string addressBcdText = BitConverter.ToString(e.Address);
+			messageHandlerLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
+			messageHandlerLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
+
+			if (messageHandler != null)
+			{
 				try
 				{
-					var message = new MqttApplicationMessageBuilder()
-									.WithTopic(topic)
-									.WithPayload(value)
-									.WithExactlyOnceQoS()
-									.WithRetainFlag()
-									.Build();
-					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
-					await mqttClient.PublishAsync(message);
-					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
-					this.logging.LogEvent("SendEventAsync CSV payload", processLoggingFields, LoggingLevel.Information);
+					messageHandler.ProcessReceive(sender, e);
 				}
 				catch (Exception ex)
 				{
-					processLoggingFields.AddString("Exception", ex.ToString());
-					this.logging.LogEvent("SendEventAsync CSV payload", processLoggingFields, LoggingLevel.Error);
+					messageHandlerLoggingFields.AddString("MessageHandler Exception", ex.ToString());
+					this.logging.LogEvent("Rfm9XDevice_OnReceive", messageHandlerLoggingFields, LoggingLevel.Error);
+					return;
 				}
 			}
+			this.logging.LogEvent("Rfm9XDevice_OnReceive", messageHandlerLoggingFields, LoggingLevel.Information);
 		}
-#endif
-
-#if PAYLOAD_TEXT_BINARY_CODED_DECIMAL
-		async Task PayloadText(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
-		}
-#endif
-
-#if PAYLOAD_BINARY_CAYENNE_LOW_POWER_PAYLOAD
-		void PayloadProcessCayenneLowPowerPayload(IMqttClient mqttClient, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
-		}
-#endif
 
 		private class ApplicationSettings
 		{
@@ -504,11 +407,12 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			[JsonProperty("MQTTPassword", Required = Required.Always)]
 			public string MqttPassword { get; set; }
 
-			[JsonProperty("MQTTTopicFormat", Required = Required.Always)]
-			public string MqttTopicFormat { get; set; }
-
 			[JsonProperty("MQTTClientID", Required = Required.Always)]
 			public string MqttClientID { get; set; }
+
+			// LoRa configuration parameters
+			[JsonProperty("MessageHandlerAssembly", Required = Required.Always)]
+			public string MessageHandlerAssembly { get; set; }
 
 			// LoRa configuration parameters
 			[JsonProperty("Address", Required = Required.Always)]
