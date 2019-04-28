@@ -24,29 +24,29 @@
 namespace devMobile.Mqtt.IoTCore.FieldGateway
 {
 	using System;
+	using System.Diagnostics;
+	using System.Text;
+	using Windows.Foundation.Diagnostics;
+
+	using devMobile.IoT.Rfm9x;
 	using MQTTnet;
 	using MQTTnet.Client;
-	using devMobile.IoT.Rfm9x;
-	using Windows.Foundation.Diagnostics;
 	using Newtonsoft.Json.Linq;
-	using System.Text;
-	using System.Diagnostics;
-	using System.Threading.Tasks;
 	using Newtonsoft.Json;
 
 	public class MessageHandler : IMessageHandler
 	{
-		private LoggingChannel logging { get; set; }
-		private IMqttClient mqttClient { get; set; }
-		private Rfm9XDevice rfm9XDevice { get; set; }
+		private LoggingChannel Logging { get; set; }
+		private IMqttClient MqttClient { get; set; }
+		private Rfm9XDevice Rfm9XDevice { get; set; }
 
 		void IMessageHandler.Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice)
 		{
 			LoggingFields processInitialiseLoggingFields = new LoggingFields();
 
-			this.logging = logging;
-			this.mqttClient = mqttClient;
-			this.rfm9XDevice = rfm9XDevice;
+			this.Logging = logging;
+			this.MqttClient = mqttClient;
+			this.Rfm9XDevice = rfm9XDevice;
 
 			string commandTopic = $"losant/{mqttClient.Options.ClientId}/command";
 			try
@@ -56,12 +56,12 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			catch (Exception ex)
 			{
 				processInitialiseLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("PayloadProcess failure converting payload to text", processInitialiseLoggingFields, LoggingLevel.Warning);
+				this.Logging.LogEvent("PayloadProcess failure converting payload to text", processInitialiseLoggingFields, LoggingLevel.Warning);
 				return;
 			}
 		}
 
-		async void IMessageHandler.ProcessReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
+		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 			LoggingFields processReceiveLoggingFields = new LoggingFields();
 			JObject telemetryDataPoint = new JObject();
@@ -85,7 +85,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			catch (Exception ex)
 			{
 				processReceiveLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("PayloadProcess failure converting payload to text", processReceiveLoggingFields, LoggingLevel.Warning);
+				this.Logging.LogEvent("PayloadProcess failure converting payload to text", processReceiveLoggingFields, LoggingLevel.Warning);
 				return;
 			}
 
@@ -93,7 +93,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			string[] sensorReadings = messageText.Split(sensorReadingSeparators, StringSplitOptions.RemoveEmptyEntries);
 			if (sensorReadings.Length < 1)
 			{
-				this.logging.LogEvent("PayloadProcess payload contains no sensor readings", processReceiveLoggingFields, LoggingLevel.Warning);
+				this.Logging.LogEvent("PayloadProcess payload contains no sensor readings", processReceiveLoggingFields, LoggingLevel.Warning);
 				return;
 			}
 
@@ -106,7 +106,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 				// Check that there is an id & value
 				if (sensorIdAndValue.Length != 2)
 				{
-					this.logging.LogEvent("PayloadProcess payload invalid format", processReceiveLoggingFields, LoggingLevel.Warning);
+					this.Logging.LogEvent("PayloadProcess payload invalid format", processReceiveLoggingFields, LoggingLevel.Warning);
 					return;
 				}
 
@@ -117,9 +117,9 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			}
 			telemetryDataPoint.Add("data", data);
 
-			processReceiveLoggingFields.AddString("MQTTClientId", mqttClient.Options.ClientId);
+			processReceiveLoggingFields.AddString("MQTTClientId", MqttClient.Options.ClientId);
 
-			string topic = $"losant/{mqttClient.Options.ClientId}/state";
+			string topic = $"losant/{MqttClient.Options.ClientId}/state";
 
 			try
 			{
@@ -129,24 +129,24 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 					.WithAtLeastOnceQoS()
 					.Build();
 				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
-				await mqttClient.PublishAsync(message);
+				await MqttClient.PublishAsync(message);
 				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
 
-				this.logging.LogEvent("PublishAsync Losant payload", processReceiveLoggingFields, LoggingLevel.Information);
+				this.Logging.LogEvent("PublishAsync Losant payload", processReceiveLoggingFields, LoggingLevel.Information);
 			}
 			catch (Exception ex)
 			{
 				processReceiveLoggingFields.AddString("Exception", ex.ToString());
-				this.logging.LogEvent("PublishAsync Losant payload", processReceiveLoggingFields, LoggingLevel.Error);
+				this.Logging.LogEvent("PublishAsync Losant payload", processReceiveLoggingFields, LoggingLevel.Error);
 			}
 		}
 
-		ProcessTransmitResponse IMessageHandler.ProcessTransmit(object sender, MqttApplicationMessageReceivedEventArgs e)
+		void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
 		{
-			return null;
+
 		}
 
-		void IMessageHandler.OnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
+		void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
 		{ 
 		}
 	}

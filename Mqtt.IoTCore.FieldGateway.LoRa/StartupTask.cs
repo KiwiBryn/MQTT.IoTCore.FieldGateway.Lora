@@ -217,7 +217,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 				messageHandler = (IMessageHandler)assembly.CreateInstance("devMobile.Mqtt.IoTCore.FieldGateway.MessageHandler");
 				if (messageHandler == null)
 				{
-					this.logging.LogMessage("MessageHandler assembly load failed", LoggingLevel.Error);
+					this.logging.LogMessage($"MessageHandler assembly {applicationSettings.MessageHandlerAssembly} load failed", LoggingLevel.Error);
 					return;
 				}
 
@@ -226,7 +226,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			catch (Exception ex)
 			{
 				mqttClientInformation.AddString("Exception", ex.ToString());
-				this.logging.LogMessage("MessageHandler Initialise failed" + ex.Message, LoggingLevel.Error);
+				this.logging.LogMessage("MessageHandler configuration failed" + ex.Message, LoggingLevel.Error);
 				return;
 			}
 
@@ -332,12 +332,12 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.ProcessTransmit(sender, e);
+					messageHandler.MqttApplicationMessageReceived(sender, e);
 				}
 				catch (Exception ex)
 				{
 					messageHandlerLoggingFields.AddString("Exception", ex.ToString());
-					this.logging.LogEvent("MqttClient_ApplicationMessageReceived MessageHandler", messageHandlerLoggingFields, LoggingLevel.Error);
+					this.logging.LogEvent("MqttClient_ApplicationMessageReceived MessageHandler failed", messageHandlerLoggingFields, LoggingLevel.Error);
 					return;
 				}
 			}
@@ -354,7 +354,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.OnTransmit(sender, e);
+					messageHandler.Rfm9xOnTransmit(sender, e);
 				}
 				catch (Exception ex)
 				{
@@ -384,7 +384,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.ProcessReceive(sender, e);
+					messageHandler.Rfm9XOnReceive(sender, e);
 				}
 				catch (Exception ex)
 				{

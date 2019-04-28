@@ -24,26 +24,20 @@
 namespace devMobile.Mqtt.IoTCore.FieldGateway
 {
 	using System;
+	using Windows.Foundation.Diagnostics;
+
+	using devMobile.IoT.Rfm9x;
 	using MQTTnet;
 	using MQTTnet.Client;
-	using devMobile.IoT.Rfm9x;
-	using Windows.Foundation.Diagnostics;
-	using System.Threading.Tasks;
-
-	public class ProcessTransmitResponse
-	{
-		public byte[] Address { get; set; }
-		public byte[] Payload { get; set; }
-	}
 
 	public interface IMessageHandler
 	{
 		void Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice);
 
-		void ProcessReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e);
-		
-		ProcessTransmitResponse ProcessTransmit(object sender, MqttApplicationMessageReceivedEventArgs e);
+		void Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e);
 
-		void OnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e);
+		void MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e);
+
+		void Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e);
 	}
 }
