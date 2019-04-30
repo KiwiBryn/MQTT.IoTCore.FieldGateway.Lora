@@ -56,7 +56,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			catch (Exception ex)
 			{
 				processInitialiseLoggingFields.AddString("Exception", ex.ToString());
-				this.Logging.LogEvent("PayloadProcess failure converting payload to text", processInitialiseLoggingFields, LoggingLevel.Warning);
+				this.Logging.LogEvent("mqttClient SubscribeAsync to command topic failure", processInitialiseLoggingFields, LoggingLevel.Warning);
 				return;
 			}
 		}
@@ -143,7 +143,17 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 
 		void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
 		{
+			LoggingFields processReceiveLoggingFields = new LoggingFields();
 
+			processReceiveLoggingFields.AddString("ClientId", e.ClientId);
+#if DEBUG
+			processReceiveLoggingFields.AddString("Payload", e.ApplicationMessage.ConvertPayloadToString());
+#endif
+			processReceiveLoggingFields.AddString("QualityOfServiceLevel", e.ApplicationMessage.QualityOfServiceLevel.ToString());
+			processReceiveLoggingFields.AddBoolean("Retain", e.ApplicationMessage.Retain);
+			processReceiveLoggingFields.AddString("Topic", e.ApplicationMessage.Topic);
+
+			this.Logging.LogEvent("MqttApplicationMessageReceived topic not processed", processReceiveLoggingFields, LoggingLevel.Error);
 		}
 
 		void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
