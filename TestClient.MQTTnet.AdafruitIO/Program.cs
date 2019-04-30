@@ -90,12 +90,12 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 
 			if (args.Length == 5)
 			{
-				topic = $"{args[1]}/feeds/{feedname}";
+				topic = $"{username}/feeds/{feedname}";				
 			}
 
 			if (args.Length == 6)
 			{
-				topic = $"{args[1]}/feeds/{groupname}.{feedname}";
+				topic = $"{username}/feeds/{groupname}.{feedname}";
 			}
 
 			while (true)
