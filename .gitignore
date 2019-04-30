@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /TestClient.MQTTnet.Ubidots/Properties/launchSettings.json
+/TestClient.MQTTnet.Losant/Properties/launchSettings.json
