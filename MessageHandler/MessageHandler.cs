@@ -36,8 +36,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 
 	public class MessageHandler : IMessageHandler
 	{
-		const string stateTopicFormat = "/v1.6/devices/{0}";
-
 		private LoggingChannel Logging { get; set; }
 		private IMqttClient MqttClient { get; set; }
 		private Rfm9XDevice Rfm9XDevice { get; set; }
@@ -106,7 +104,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			}
 			processReceiveLoggingFields.AddString("MQTTClientId", MqttClient.Options.ClientId);
 
-			string stateTopic = string.Format(stateTopicFormat, MqttClient.Options.ClientId);
+			string stateTopic = $"/v1.6/devices/{MqttClient.Options.ClientId}";
 
 			try
 			{

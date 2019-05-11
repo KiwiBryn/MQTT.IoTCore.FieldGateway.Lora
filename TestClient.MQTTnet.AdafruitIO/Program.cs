@@ -84,6 +84,7 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 
 			mqttClient.Disconnected += MqttClient_Disconnected;
 			mqttClient.ConnectAsync(mqttOptions).Wait();
+			mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
 
 			// Adafruit.IO format for topics which are called feeds
 			string topic = string.Empty;
@@ -97,6 +98,11 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			{
 				topic = $"{username}/feeds/{groupname}.{feedname}";
 			}
+
+			//string commandTopic = "BrynHLewis/feeds/105windermere.5c-86-4a-00-e4-1dt";
+			//string commandTopic = "BrynHLewis/feeds/setpoint";
+			string commandTopic = "BrynHLewis/groups/105windermere";
+			mqttClient.SubscribeAsync(commandTopic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce).GetAwaiter().GetResult();
 
 			while (true)
 			{
@@ -117,6 +123,11 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 
 				Thread.Sleep(30100);
 			}
+		}
+
+		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		{
+			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
 		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)

@@ -77,9 +77,22 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Ubidots
 
 			// Setup a subscription for commands sent to client
 			string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv";
+			commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired";
 			mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
 
-			//// Ubidots formatted client state update topic
+			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv";
+			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired"; // JSON
+			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
+
+			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l/lv";
+			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l"; // JSON
+			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
+
+			//string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";  // Works
+			string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";
+			mqttClient.SubscribeAsync(commandTopic3).GetAwaiter().GetResult();
+
+			// Ubidots formatted client state update topic
 			string stateTopic = $"/v1.6/devices/{deviceLabel}";
 
 			while (true)

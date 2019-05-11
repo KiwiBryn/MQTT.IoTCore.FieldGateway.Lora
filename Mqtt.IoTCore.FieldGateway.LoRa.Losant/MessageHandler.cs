@@ -113,7 +113,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 				string sensorId = sensorIdAndValue[0];
 				string value = sensorIdAndValue[1];
 
-				data.Add(addressBcdText + sensorId, Convert.ToDouble(value));
+				data.Add(addressBcdText + sensorId, value);
 			}
 			telemetryDataPoint.Add("data", data);
 

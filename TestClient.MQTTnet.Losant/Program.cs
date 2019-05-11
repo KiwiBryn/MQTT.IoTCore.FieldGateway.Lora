@@ -92,7 +92,7 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				Console.WriteLine($"Topic:{stateTopic} Temperature:{temperature} Humidity:{humidity} HeatPumpOn:{heatPumpOn}");
 
 				// First attempt which worked
-				payloadText = @"{""data"":{ ""OfficeTemperature"":22.5}}";
+				//payloadText = @"{""data"":{ ""OfficeTemperature"":22.5}}";
 
 				// Second attempt to work out data format with "real" values injected
 				//payloadText = @"{""data"":{ ""OfficeTemperature"":"+ temperature.ToString("f1") + @",""OfficeHumidity"":" + humidity.ToString("F0") + @"}}";
@@ -105,7 +105,14 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				//data.Add("OfficeTemperature", temperature.ToString("F1"));
 				//data.Add("OfficeHumidity", humidity.ToString("F0"));
 
-				//data.Add("HeatPumpOn", heatPumpOn);
+				//if (heatPumpOn)
+				//{
+				//	data.Add("HeatPumpOn", "true");
+				//}
+				//else
+				//{
+				//	data.Add("HeatPumpOn", "false");
+				//}
 				//heatPumpOn = !heatPumpOn;
 				//payloadJObject.Add( "data", data);
 
@@ -118,6 +125,17 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				//data.Add("GPS", "-43.5309325, 172.637119"); // Christchurch Cathederal
 				//payloadJObject.Add("data", data);
 				//payloadText = JsonConvert.SerializeObject(payloadJObject);
+
+				// Fith attempt for peripheral device
+				stateTopic = $"losant/5cd3f2fed8920a0009bd68c8/state";
+
+				JObject payloadJObject = new JObject(); 
+				JObject data = new JObject();
+				data.Add("t", temperature.ToString("F1"));
+				data.Add("h", humidity.ToString("F0"));
+				payloadJObject.Add( "data", data);
+
+				payloadText = JsonConvert.SerializeObject(payloadJObject);
 
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
