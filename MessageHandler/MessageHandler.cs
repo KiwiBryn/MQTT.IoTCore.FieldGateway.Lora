@@ -20,19 +20,17 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
+
+	 Template for MessageHandler assemblies with sample logging code
  */
 namespace devMobile.Mqtt.IoTCore.FieldGateway
 {
 	using System;
-	using System.Diagnostics;
-	using System.Text;
 	using Windows.Foundation.Diagnostics;
 
 	using devMobile.IoT.Rfm9x;
 	using MQTTnet;
 	using MQTTnet.Client;
-	using Newtonsoft.Json.Linq;
-	using Newtonsoft.Json;
 
 	public class MessageHandler : IMessageHandler
 	{
@@ -52,9 +50,6 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 			LoggingFields processReceiveLoggingFields = new LoggingFields();
-			JObject telemetryDataPoint = new JObject();
-			char[] sensorReadingSeparators = { ',' };
-			char[] sensorIdAndValueSeparators = { ' ' };
 
 			processReceiveLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
 			processReceiveLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
@@ -64,66 +59,11 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			processReceiveLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
 			processReceiveLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
 
-			string messageText;
-			try
-			{
-				messageText = UTF8Encoding.UTF8.GetString(e.Data);
-				processReceiveLoggingFields.AddString("MessageText", messageText);
-			}
-			catch (Exception ex)
-			{
-				processReceiveLoggingFields.AddString("Exception", ex.ToString());
-				this.Logging.LogEvent("PayloadProcess failure converting payload to text", processReceiveLoggingFields, LoggingLevel.Warning);
-				return;
-			}
+			string payloadBcdText = BitConverter.ToString(e.Data);
+			processReceiveLoggingFields.AddInt32("PayloadLength", e.Data.Length);
+			processReceiveLoggingFields.AddString("DeviceAddressBCD", payloadBcdText);
 
-			// Chop up the CSV text
-			string[] sensorReadings = messageText.Split(sensorReadingSeparators, StringSplitOptions.RemoveEmptyEntries);
-			if (sensorReadings.Length < 1)
-			{
-				this.Logging.LogEvent("PayloadProcess payload contains no sensor readings", processReceiveLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-
-			// Chop up each sensor read into an ID & value
-			foreach (string sensorReading in sensorReadings)
-			{
-				string[] sensorIdAndValue = sensorReading.Split(sensorIdAndValueSeparators, StringSplitOptions.RemoveEmptyEntries);
-
-				// Check that there is an id & value
-				if (sensorIdAndValue.Length != 2)
-				{
-					this.Logging.LogEvent("PayloadProcess payload invalid format", processReceiveLoggingFields, LoggingLevel.Warning);
-					return;
-				}
-
-				string sensorId = sensorIdAndValue[0];
-				string value = sensorIdAndValue[1];
-
-				telemetryDataPoint.Add(addressBcdText + sensorId, Convert.ToDouble(value));
-			}
-			processReceiveLoggingFields.AddString("MQTTClientId", MqttClient.Options.ClientId);
-
-			string stateTopic = $"/v1.6/devices/{MqttClient.Options.ClientId}";
-
-			try
-			{
-				var message = new MqttApplicationMessageBuilder()
-					.WithTopic(stateTopic)
-					.WithPayload(JsonConvert.SerializeObject(telemetryDataPoint))
-					.WithAtLeastOnceQoS()
-					.Build();
-				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
-				await MqttClient.PublishAsync(message);
-				Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
-
-				this.Logging.LogEvent("PublishAsync Ubidots payload", processReceiveLoggingFields, LoggingLevel.Information);
-			}
-			catch (Exception ex)
-			{
-				processReceiveLoggingFields.AddString("Exception", ex.ToString());
-				this.Logging.LogEvent("PublishAsync Ubidots payload", processReceiveLoggingFields, LoggingLevel.Error);
-			}
+			this.Logging.LogEvent("Rfm9XOnReceive", processReceiveLoggingFields, LoggingLevel.Information);
 		}
 
 		void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
@@ -143,6 +83,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 
 		void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
 		{
+			this.Logging.LogMessage("Rfm9xOnTransmit", LoggingLevel.Information);
 		}
 	}
 }
