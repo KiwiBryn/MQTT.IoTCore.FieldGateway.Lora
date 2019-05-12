@@ -41,6 +41,7 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 		private static string username;
 		private static string password;
 		private static string clientId;
+		private static string commandTopic;
 		private static string groupname;
 		private static string feedname;
 
@@ -51,8 +52,8 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 
 			if ((args.Length != 5) && (args.Length != 6))
 			{
-				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [GroupName] [FeedName]");
-				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [FeedName]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [CommandTopic] [GroupName] [FeedName]");
+				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [CommandTopic] [FeedName]");
 				Console.WriteLine("Press <enter> to exit");
 				Console.ReadLine();
 				return;
@@ -62,17 +63,18 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			username = args[1];
 			password = args[2];
 			clientId = args[3];
-			if (args.Length == 5)
-			{
-				feedname = args[4].ToLower();
-				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Feedname:{feedname}");
-			}
-
+			commandTopic = args[4];
 			if (args.Length == 6)
 			{
-				groupname = args[4].ToLower();
 				feedname = args[5].ToLower();
-				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} Groupname:{groupname} Feedname:{feedname}");
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} CommandTopic:{commandTopic} Feedname:{feedname}");
+			}
+
+			if (args.Length == 7)
+			{
+				groupname = args[5].ToLower();
+				feedname = args[6].ToLower();
+				Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId} CommandTopic:{commandTopic} Groupname:{groupname} Feedname:{feedname}");
 			}
 
 			mqttOptions = new MqttClientOptionsBuilder()
@@ -99,9 +101,6 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 				topic = $"{username}/feeds/{groupname}.{feedname}";
 			}
 
-			//string commandTopic = "BrynHLewis/feeds/105windermere.5c-86-4a-00-e4-1dt";
-			//string commandTopic = "BrynHLewis/feeds/setpoint";
-			string commandTopic = "BrynHLewis/groups/105windermere";
 			mqttClient.SubscribeAsync(commandTopic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce).GetAwaiter().GetResult();
 
 			while (true)
@@ -113,6 +112,7 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 					.WithTopic(topic)
 					.WithPayload(value)
 					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+					//.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.WithExactlyOnceQoS()
 				.WithRetainFlag()
 				.Build();

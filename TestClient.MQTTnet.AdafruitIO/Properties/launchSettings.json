@@ -2,7 +2,7 @@
   "profiles": {
     "TestClient.MQTTnet.AdafruitIO": {
       "commandName": "Project",
-      "commandLineArgs": "io.adafruit.com BrynHLewis 863603aef5f940bca1e7132b339389ab Trial officetemperature"
+      "commandLineArgs": "io.adafruit.com BrynHLewis 863603aef5f940bca1e7132b339389ab Trial  \"BrynHLewis/feeds/setpoint\" officetemperature"
     }
   }
 }
