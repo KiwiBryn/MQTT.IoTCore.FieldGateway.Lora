@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestClient.MQTTnet.AskSensors": {
+      "commandName": "Project",
+      "commandLineArgs": "mqtt.asksensors.com BrynHLewis KLQRcefl0VxKbir4SnwbAqOi6SpX694L 1568-19"
+    }
+  }
+}

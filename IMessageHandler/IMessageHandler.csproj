@@ -126,10 +126,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.8</Version>
+      <Version>6.2.9</Version>
     </PackageReference>
     <PackageReference Include="MQTTnet">
-      <Version>2.8.5</Version>
+      <Version>3.0.8</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
