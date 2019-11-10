@@ -77,22 +77,6 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.AskSensors
 			mqttClient.Disconnected += MqttClient_Disconnected;
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
-			// Setup a subscription for commands sent to client
-			//commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired";
-			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
-
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv";
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired"; // JSON
-			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
-
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l/lv";
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l"; // JSON
-			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
-
-			//string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";  // Works
-			//string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";
-			//mqttClient.SubscribeAsync(commandTopic3).GetAwaiter().GetResult();
-
 			// AskSensors formatted client state update topic
 			string stateTopic = $"{username}/{apiKey}";
 
@@ -104,54 +88,23 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.AskSensors
 				double speed = 10 + (DateTime.UtcNow.Millisecond / 100.0);
 				Console.WriteLine($"Topic:{stateTopic} Temperature:{temperature:0.00} Humidity:{humidity:0} HeatPumpOn:{heatPumpOn}");
 
-				// First attempt which worked
-				//payloadText = @"{""OfficeTemperature"":22.5}";
+				// First JSON attempt didn't work
+				payloadText = @"{""Humidity"":55}";
 
-				// Second attempt to work out data format with "real" values injected
-				//payloadText = @"{ ""officetemperature"":"+ temperature.ToString("F2") + @",""officehumidity"":" + humidity.ToString("F0") + @"}";
+            // Second attempt worked
+            payloadText = $"module1=22";
 
-				// Third attempt with Jobject which sort of worked but number serialisation was sub optimal
-				//JObject payloadJObject = new JObject();
-				//payloadJObject.Add("Module 1", temperature.ToString("F2"));
-				//payloadJObject.Add("Module 2", humidity.ToString("F0"));
-				/*
-				if (heatPumpOn)
-				{
-					payloadJObject.Add("HeatPumpOn", 1);
-				}
-				else
-				{
-					payloadJObject.Add("HeatPumpOn", 0);
-				}
-				heatPumpOn = !heatPumpOn;
-				*/
-				//payloadText = JsonConvert.SerializeObject(payloadJObject);
+            // Third attempt with "real" values injected
+            payloadText = $"module1={temperature}&m2={humidity}";
 
-				/*
-				// Forth attempt with JOBject, timestamps and gps 
-				JObject payloadJObject = new JObject();
-				JObject context = new JObject();
-				context.Add("lat", "-43.5309325");
-				context.Add("lng", "172.637119");// Christchurch Cathederal
-			   //context.Add("timestamp", ((DateTimeOffset)(DateTime.UtcNow)).ToUnixTimeSeconds()); // This field is optional and can be commented out
-				JObject position = new JObject();
-				position.Add("context", context);
-				position.Add("value", "0");
-				payloadJObject.Add("postion", position);
-				payloadText = JsonConvert.SerializeObject(payloadJObject);
-				*/
-
-				//payloadText = $"module1={temperature}&m2={humidity}";
-				payloadText = $"module1=22";
-
-				var message = new MqttApplicationMessageBuilder()
+            var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
 					.WithPayload(payloadText)
-				//	.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				//.WithExactlyOnceQoS()// With AskSensors this caused the publish to hang
-				.WithAtLeastOnceQoS()
-				//.WithRetainFlag()
-				.Build();
+					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+				   .WithExactlyOnceQoS()
+				   //.WithAtLeastOnceQoS()
+				   //.WithRetainFlag()
+				   .Build();
 
 				Console.WriteLine("PublishAsync start");
 				mqttClient.PublishAsync(message).Wait();
