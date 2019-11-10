@@ -27,8 +27,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageHandler", "MessageHa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.AskSensors", "TestClient.MQTTnet.AskSensors\TestClient.MQTTnet.AskSensors.csproj", "{44665223-0291-4F37-A40F-05F05C96C14D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTNet.ArduinoCloud", "TestClient.MQTTNet.ArduinoCloud\TestClient.MQTTNet.ArduinoCloud.csproj", "{FE8AA694-8697-40D6-A39A-E275F15B7BD0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -287,26 +285,6 @@ Global
 		{44665223-0291-4F37-A40F-05F05C96C14D}.Release|x64.Build.0 = Release|Any CPU
 		{44665223-0291-4F37-A40F-05F05C96C14D}.Release|x86.ActiveCfg = Release|Any CPU
 		{44665223-0291-4F37-A40F-05F05C96C14D}.Release|x86.Build.0 = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|ARM.Build.0 = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|x64.Build.0 = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Debug|x86.Build.0 = Debug|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|ARM.ActiveCfg = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|ARM.Build.0 = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|ARM64.Build.0 = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|x64.ActiveCfg = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|x64.Build.0 = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|x86.ActiveCfg = Release|Any CPU
-		{FE8AA694-8697-40D6-A39A-E275F15B7BD0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
