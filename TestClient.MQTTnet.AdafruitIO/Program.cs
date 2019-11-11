@@ -50,7 +50,7 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			MqttFactory factory = new MqttFactory();
 			mqttClient = factory.CreateMqttClient();
 
-			if ((args.Length != 5) && (args.Length != 6))
+			if ((args.Length != 6) && (args.Length != 7))
 			{
 				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [CommandTopic] [GroupName] [FeedName]");
 				Console.WriteLine("[MQTT Server] [UserName] [Password] [ClientID] [CommandTopic] [FeedName]");
@@ -91,12 +91,12 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			// Adafruit.IO format for topics which are called feeds
 			string topic = string.Empty;
 
-			if (args.Length == 5)
+			if (args.Length == 6)
 			{
 				topic = $"{username}/feeds/{feedname}";				
 			}
 
-			if (args.Length == 6)
+			if (args.Length == 7)
 			{
 				topic = $"{username}/feeds/{groupname}.{feedname}";
 			}
