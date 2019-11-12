@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright ® 2019 April devMobile Software, All Rights Reserved
+    Copyright ® 2019 April/November devMobile Software, All Rights Reserved
  
     MIT License
 
@@ -101,7 +101,7 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 				topic = $"{username}/feeds/{groupname}.{feedname}";
 			}
 
-			mqttClient.SubscribeAsync(commandTopic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce).GetAwaiter().GetResult();
+			mqttClient.SubscribeAsync(commandTopic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
 
 			while (true)
 			{
@@ -112,7 +112,6 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 					.WithTopic(topic)
 					.WithPayload(value)
 					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-					//.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.WithExactlyOnceQoS()
 				.WithRetainFlag()
 				.Build();
