@@ -42,7 +42,7 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Ubidots
 		private static IMqttClientOptions mqttOptions = null;
 		private static string server;
 		private static string username;
-		private static string deviceLabel;
+      private static string deviceLabel;
 
 		static void Main(string[] args)
 		{
@@ -75,25 +75,20 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Ubidots
 			mqttClient.Disconnected += MqttClient_Disconnected;
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
-			// Setup a subscription for commands sent to client
-			string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv";
-			commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired";
-			mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
+			// Setup a subscription for commands sent to client lv = last value
+			string commandTopic;
 
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv";
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired"; // JSON
-			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
+         //commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired/lv"; 
+         //commandTopic = $"/v1.6/devices/{deviceLabel}/officetemperaturedesired"; 
 
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l/lv";
-			//string commandTopic = $"/v1.6/devices/{deviceLabel}/53-65-65-65-64-41-4d-32-33-30-32-31l"; // JSON
-			//mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
+         // Wildcard subscription for notification of all the variables of device
+         commandTopic = $"/v1.6/devices/{deviceLabel}/+"; 
+         //commandTopic = $"/v1.6/devices/{deviceLabel}/lv/+"; // formatting not quite right doesn't work
 
-			//string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";  // Works
-			string commandTopic3 = $"/v1.6/devices/{deviceLabel}/+";
-			mqttClient.SubscribeAsync(commandTopic3).GetAwaiter().GetResult();
+         mqttClient.SubscribeAsync(commandTopic).GetAwaiter().GetResult();
 
-			// Ubidots formatted client state update topic
-			string stateTopic = $"/v1.6/devices/{deviceLabel}";
+         // Ubidots formatted client state update topic
+         string stateTopic = $"/v1.6/devices/{deviceLabel}";
 
 			while (true)
 			{
@@ -112,7 +107,7 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Ubidots
 				// Third attempt with Jobject which sort of worked but number serialisation was sub optimal
 				JObject payloadJObject = new JObject(); 
 				payloadJObject.Add("OfficeTemperature", temperature.ToString("F2"));
-				payloadJObject.Add("OfficeHumidity", humidity.ToString("F0"));
+            payloadJObject.Add("OfficeHumidity", 55.0);//humidity.ToString("F0"));
 
 				if (heatPumpOn)
 				{
