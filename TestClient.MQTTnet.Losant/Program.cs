@@ -24,15 +24,14 @@
 	 A quick and dirty test client to explore how Losant MQTT connectivity with 
 	 the MQTTnet library works
 */
-namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
+namespace devmobile.Mqtt.TestClient.Losant
 {
 	using System;
 	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
-
-	using global::MQTTnet;
-	using global::MQTTnet.Client;
+   using MQTTnet;
+	using MQTTnet.Client;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
@@ -79,10 +78,10 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 
 			// Setup a subscription for commands sent to client
 			string commandTopic = $"losant/{clientId}/command";
-			mqttClient.SubscribeAsync(commandTopic);
+         mqttClient.SubscribeAsync(commandTopic);
 
-			// Losant formatted client state update topic
-			string stateTopic = $"losant/{clientId}/state";
+         // Losant formatted client state update topic
+         string stateTopic = $"losant/{clientId}/state";
 
 			while (true)
 			{
@@ -91,43 +90,44 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.Losant
 				double humidity = 50 + +(DateTime.UtcNow.Millisecond / 1000.0);
 				Console.WriteLine($"Topic:{stateTopic} Temperature:{temperature} Humidity:{humidity} HeatPumpOn:{heatPumpOn}");
 
-				// First attempt which worked
-				//payloadText = @"{""data"":{ ""OfficeTemperature"":22.5}}";
+            // First attempt which worked
+            //payloadText = @"{""data"":{ ""OfficeTemperature"":22.5}}";
 
-				// Second attempt to work out data format with "real" values injected
-				//payloadText = @"{""data"":{ ""OfficeTemperature"":"+ temperature.ToString("f1") + @",""OfficeHumidity"":" + humidity.ToString("F0") + @"}}";
+            // Second attempt to work out data format with "real" values injected
+            //payloadText = @"{""data"":{ ""OfficeTemperature"":"+ temperature.ToString("f1") + @",""OfficeHumidity"":" + humidity.ToString("F0") + @"}}";
 
-				// Third attempt with Jobject which sort of worked but number serialisation is sub optimal
-				//JObject payloadJObject = new JObject(); 
-				//payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
+            // Third attempt with Jobject which sort of worked but number serialisation is sub optimal
+            //JObject payloadJObject = new JObject(); 
+            //payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
 
-				//JObject data = new JObject();
-				//data.Add("OfficeTemperature", temperature.ToString("F1"));
-				//data.Add("OfficeHumidity", humidity.ToString("F0"));
+            //JObject data = new JObject();
+            //data.Add("OfficeTemperature", temperature.ToString("F1"));
+            //data.Add("OfficeHumidity", humidity.ToString("F0"));
 
-				//if (heatPumpOn)
-				//{
-				//	data.Add("HeatPumpOn", "true");
-				//}
-				//else
-				//{
-				//	data.Add("HeatPumpOn", "false");
-				//}
-				//heatPumpOn = !heatPumpOn;
-				//payloadJObject.Add( "data", data);
+            //if (heatPumpOn)
+            //{
+            //	data.Add("HeatPumpOn", "true");
+            //}
+            //else
+            //{
+            //	data.Add("HeatPumpOn", "false");
+            //}
+            //heatPumpOn = !heatPumpOn;
+            //payloadJObject.Add( "data", data);
 
-				//payloadText = JsonConvert.SerializeObject(payloadJObject);
+            //payloadText = JsonConvert.SerializeObject(payloadJObject);
 
-				// Forth attempt with JOBject and gps info https://docs.losant.com/devices/state/
-				//JObject payloadJObject = new JObject(); 
-				//payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
-				//JObject data = new JObject();
-				//data.Add("GPS", "-43.5309325, 172.637119"); // Christchurch Cathederal
-				//payloadJObject.Add("data", data);
-				//payloadText = JsonConvert.SerializeObject(payloadJObject);
+            // Forth attempt with JOBject and gps info https://docs.losant.com/devices/state/
+            //JObject payloadJObject = new JObject(); 
+            //payloadJObject.Add("time", DateTime.UtcNow.ToString("u")); // This field is optional and can be commented out
+            //JObject data = new JObject();
+            //data.Add("GPS", "-43.5309325, 172.637119"); // Christchurch Cathederal
+            //payloadJObject.Add("data", data);
+            //payloadText = JsonConvert.SerializeObject(payloadJObject);
 
-				// Fith attempt for peripheral device
-				stateTopic = $"losant/5cd3f2fed8920a0009bd68c8/state";
+            // Fith attempt for peripheral device
+            //stateTopic = $"losant/5cd3f2fed8920a0009bd68c8/state";
+            stateTopic = $"losant/{clientId}/state";
 
 				JObject payloadJObject = new JObject(); 
 				JObject data = new JObject();
