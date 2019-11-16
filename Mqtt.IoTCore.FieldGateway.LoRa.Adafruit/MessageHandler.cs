@@ -23,141 +23,152 @@
  */
 namespace devMobile.Mqtt.IoTCore.FieldGateway
 {
-	using System;
-	using System.Diagnostics;
-	using System.Text;
-	using Windows.Foundation.Diagnostics;
+   using System;
+   using System.Diagnostics;
+   using System.Text;
+   using Windows.Foundation.Diagnostics;
 
-	using devMobile.IoT.Rfm9x;
-	using MQTTnet;
-	using MQTTnet.Client;
+   using devMobile.IoT.Rfm9x;
+   using MQTTnet;
+   using MQTTnet.Client;
+   using Newtonsoft.Json.Linq;
+   using Newtonsoft.Json;
 
-	public class MessageHandler : IMessageHandler
-	{
-		private LoggingChannel Logging { get; set; }
-		private IMqttClient MqttClient { get; set; }
-		private Rfm9XDevice Rfm9XDevice { get; set; }
+   public class MessageHandler : IMessageHandler
+   {
+      private LoggingChannel Logging { get; set; }
+      private IMqttClient MqttClient { get; set; }
+      private Rfm9XDevice Rfm9XDevice { get; set; }
+      private string PlatformSpecificConfiguration { get; set; }
 
-		void IMessageHandler.Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice)
-		{
-			LoggingFields processInitialiseLoggingFields = new LoggingFields();
+      void IMessageHandler.Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice, string platformSpecificConfiguration)
+      {
+         LoggingFields processInitialiseLoggingFields = new LoggingFields();
 
-			this.Logging = logging;
-			this.MqttClient = mqttClient;
-			this.Rfm9XDevice = rfm9XDevice;
+         this.Logging = logging;
+         this.MqttClient = mqttClient;
+         this.Rfm9XDevice = rfm9XDevice;
+         this.PlatformSpecificConfiguration = platformSpecificConfiguration;
 
-			// This is an AdaFruit specific topic which indicates that application has maxed out messages/period quota
-			string rateLimittopic = $"{MqttClient.Options.Credentials.Username}/throttle";
-			try
-			{
-				mqttClient.SubscribeAsync(rateLimittopic);
-			}
-			catch (Exception ex)
-			{
-				processInitialiseLoggingFields.AddString("Exception", ex.ToString());
-				this.Logging.LogEvent("mqttClient SubscribeAsync to throttle topic failure", processInitialiseLoggingFields, LoggingLevel.Warning);
-				return;
-			}
-		}
+         // This is an AdaFruit specific topic which indicates that application has maxed out messages/period quota
+         string rateLimittopic = $"{MqttClient.Options.Credentials.Username}/throttle";
+         try
+         {
+            mqttClient.SubscribeAsync(rateLimittopic);
+         }
+         catch (Exception ex)
+         {
+            processInitialiseLoggingFields.AddString("Exception", ex.ToString());
+            this.Logging.LogEvent("mqttClient SubscribeAsync to throttle topic failure", processInitialiseLoggingFields, LoggingLevel.Warning);
+            return;
+         }
+      }
 
-		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
-		{
-			LoggingFields processReceiveLoggingFields = new LoggingFields();
-			char[] sensorReadingSeparators = { ',' };
-			char[] sensorIdAndValueSeparators = { ' ' };
+      async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
+      {
+         LoggingFields processReceiveLoggingFields = new LoggingFields();
+         char[] sensorReadingSeparators = { ',' };
+         char[] sensorIdAndValueSeparators = { ' ' };
 
-			processReceiveLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
-			processReceiveLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
-			processReceiveLoggingFields.AddInt32("RSSI", e.Rssi);
+         processReceiveLoggingFields.AddString("PacketSNR", e.PacketSnr.ToString("F1"));
+         processReceiveLoggingFields.AddInt32("PacketRSSI", e.PacketRssi);
+         processReceiveLoggingFields.AddInt32("RSSI", e.Rssi);
 
-			string addressBcdText = BitConverter.ToString(e.Address);
-			processReceiveLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
-			processReceiveLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
+         string addressBcdText = BitConverter.ToString(e.Address);
+         processReceiveLoggingFields.AddInt32("DeviceAddressLength", e.Address.Length);
+         processReceiveLoggingFields.AddString("DeviceAddressBCD", addressBcdText);
 
-			string messageText;
-			try
-			{
-				messageText = UTF8Encoding.UTF8.GetString(e.Data);
-				processReceiveLoggingFields.AddString("MessageText", messageText);
-			}
-			catch (Exception ex)
-			{
-				processReceiveLoggingFields.AddString("Exception", ex.ToString());
-				this.Logging.LogEvent("PayloadProcess failure converting payload to text", processReceiveLoggingFields, LoggingLevel.Warning);
-				return;
-			}
+         string messageText;
+         try
+         {
+            messageText = UTF8Encoding.UTF8.GetString(e.Data);
+            processReceiveLoggingFields.AddString("MessageText", messageText);
+         }
+         catch (Exception ex)
+         {
+            processReceiveLoggingFields.AddString("Exception", ex.ToString());
+            this.Logging.LogEvent("PayloadProcess failure converting payload to text", processReceiveLoggingFields, LoggingLevel.Warning);
+            return;
+         }
 
-			// Chop up the CSV text
-			string[] sensorReadings = messageText.Split(sensorReadingSeparators, StringSplitOptions.RemoveEmptyEntries);
-			if (sensorReadings.Length < 1)
-			{
-				this.Logging.LogEvent("PayloadProcess payload contains no sensor readings", processReceiveLoggingFields, LoggingLevel.Warning);
-				return;
-			}
+         // Chop up the CSV text
+         string[] sensorReadings = messageText.Split(sensorReadingSeparators, StringSplitOptions.RemoveEmptyEntries);
+         if (sensorReadings.Length < 1)
+         {
+            this.Logging.LogEvent("PayloadProcess payload contains no sensor readings", processReceiveLoggingFields, LoggingLevel.Warning);
+            return;
+         }
 
-			// Chop up each sensor read into an ID & value
-			foreach (string sensorReading in sensorReadings)
-			{
-				string[] sensorIdAndValue = sensorReading.Split(sensorIdAndValueSeparators, StringSplitOptions.RemoveEmptyEntries);
+         JObject payloadJObject = new JObject();
 
-				// Check that there is an id & value
-				if (sensorIdAndValue.Length != 2)
-				{
-					this.Logging.LogEvent("PayloadProcess payload invalid format", processReceiveLoggingFields, LoggingLevel.Warning);
-					return;
-				}
+         JObject feeds = new JObject();
 
-				string sensorId = string.Concat(addressBcdText, sensorIdAndValue[0]);
-				string value = sensorIdAndValue[1];
+         // Chop up each sensor read into an ID & value
+         foreach (string sensorReading in sensorReadings)
+         {
+            string[] sensorIdAndValue = sensorReading.Split(sensorIdAndValueSeparators, StringSplitOptions.RemoveEmptyEntries);
 
-				string topic = $"{MqttClient.Options.Credentials.Username}/feeds/{sensorId}";
+            // Check that there is an id & value
+            if (sensorIdAndValue.Length != 2)
+            {
+               this.Logging.LogEvent("PayloadProcess payload invalid format", processReceiveLoggingFields, LoggingLevel.Warning);
+               return;
+            }
 
-				try
-				{
-					var message = new MqttApplicationMessageBuilder()
-						.WithTopic(topic)
-						.WithPayload(value)
-						.WithAtLeastOnceQoS()
-						.Build();
-					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
-					await MqttClient.PublishAsync(message);
-					Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
+            string sensorId = string.Concat(addressBcdText, sensorIdAndValue[0]);
+            string value = sensorIdAndValue[1];
 
-					this.Logging.LogEvent("PublishAsync Adafruit payload", processReceiveLoggingFields, LoggingLevel.Information);
-				}
-				catch (Exception ex)
-				{
-					processReceiveLoggingFields.AddString("Exception", ex.ToString());
-					this.Logging.LogEvent("PublishAsync Adafruit payload", processReceiveLoggingFields, LoggingLevel.Error);
-				}
-			}
-		}
+            feeds.Add(sensorId.ToLower(), value);
+         }
+         payloadJObject.Add("feeds", feeds);
 
-		void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
-		{
-			LoggingFields processReceiveLoggingFields = new LoggingFields();
+         string topic = $"{MqttClient.Options.Credentials.Username}/groups/{PlatformSpecificConfiguration}";
 
-			processReceiveLoggingFields.AddString("ClientId", e.ClientId);
+         try
+         {
+            var message = new MqttApplicationMessageBuilder()
+               .WithTopic(topic)
+               .WithPayload(JsonConvert.SerializeObject(payloadJObject))
+               .WithAtLeastOnceQoS()
+               .Build();
+            Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync start", DateTime.UtcNow);
+            await MqttClient.PublishAsync(message);
+            Debug.WriteLine(" {0:HH:mm:ss} MQTT Client PublishAsync finish", DateTime.UtcNow);
+
+            this.Logging.LogEvent("PublishAsync Adafruit payload", processReceiveLoggingFields, LoggingLevel.Information);
+         }
+         catch (Exception ex)
+         {
+            processReceiveLoggingFields.AddString("Exception", ex.ToString());
+            this.Logging.LogEvent("PublishAsync Adafruit payload", processReceiveLoggingFields, LoggingLevel.Error);
+         }
+      }
+
+      void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+      {
+         LoggingFields processReceiveLoggingFields = new LoggingFields();
+
+         processReceiveLoggingFields.AddString("ClientId", e.ClientId);
 #if DEBUG
-			processReceiveLoggingFields.AddString("Payload", e.ApplicationMessage.ConvertPayloadToString());
+         processReceiveLoggingFields.AddString("Payload", e.ApplicationMessage.ConvertPayloadToString());
 #endif
-			processReceiveLoggingFields.AddString("QualityOfServiceLevel", e.ApplicationMessage.QualityOfServiceLevel.ToString());
-			processReceiveLoggingFields.AddBoolean("Retain", e.ApplicationMessage.Retain);
-			processReceiveLoggingFields.AddString("Topic", e.ApplicationMessage.Topic);
+         processReceiveLoggingFields.AddString("QualityOfServiceLevel", e.ApplicationMessage.QualityOfServiceLevel.ToString());
+         processReceiveLoggingFields.AddBoolean("Retain", e.ApplicationMessage.Retain);
+         processReceiveLoggingFields.AddString("Topic", e.ApplicationMessage.Topic);
 
-			// Check to see if this is a rate limit notification
-			string rateLimittopic = $"{MqttClient.Options.Credentials.Username}/throttle";
-			if ( string.Compare(e.ApplicationMessage.Topic, rateLimittopic, false) ==0)
-			{
-				this.Logging.LogEvent("MqttApplicationMessageReceived rate limiting occuring", processReceiveLoggingFields, LoggingLevel.Warning);
-				return;
-			}
+         // Check to see if this is a rate limit notification
+         string rateLimittopic = $"{MqttClient.Options.Credentials.Username}/throttle";
+         if (string.Compare(e.ApplicationMessage.Topic, rateLimittopic, false) == 0)
+         {
+            this.Logging.LogEvent("MqttApplicationMessageReceived rate limiting occuring", processReceiveLoggingFields, LoggingLevel.Warning);
+            return;
+         }
 
-			this.Logging.LogEvent("MqttApplicationMessageReceived topic not processed", processReceiveLoggingFields, LoggingLevel.Error);
-		}
+         this.Logging.LogEvent("MqttApplicationMessageReceived topic not processed", processReceiveLoggingFields, LoggingLevel.Error);
+      }
 
-		void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
-		{
-		}
-	}
+      void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
+      {
+      }
+   }
 }
