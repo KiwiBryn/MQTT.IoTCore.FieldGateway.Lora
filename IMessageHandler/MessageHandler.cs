@@ -32,7 +32,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 
 	public interface IMessageHandler
 	{
-		void Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice);
+		void Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice,string platformSpecificConfiguration);
 
 		void Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e);
 

@@ -181,7 +181,8 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			mqttClientInformation.AddString("Password", this.applicationSettings.MqttPassword);
 			mqttClientInformation.AddString("Server", this.applicationSettings.MqttServer);
 			mqttClientInformation.AddString("ClientID", this.applicationSettings.MqttClientID);
-			this.logging.LogEvent("MQTT client configuration", mqttClientInformation, LoggingLevel.Information);
+         mqttClientInformation.AddString("PlatformSpecificConfiguration", this.applicationSettings.PlatformSpecificConfiguration);
+         this.logging.LogEvent("MQTT client configuration", mqttClientInformation, LoggingLevel.Information);
 
 			// Connect the MQTT broker so we are ready for messages
 			var factory = new MqttFactory();
@@ -221,7 +222,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 					return;
 				}
 
-				messageHandler.Initialise(logging, mqttClient, rfm9XDevice);
+				messageHandler.Initialise(logging, mqttClient, rfm9XDevice, applicationSettings.PlatformSpecificConfiguration);
 			}
 			catch (Exception ex)
 			{
@@ -410,8 +411,11 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			[JsonProperty("MQTTClientID", Required = Required.Always)]
 			public string MqttClientID { get; set; }
 
-			// LoRa configuration parameters
-			[JsonProperty("MessageHandlerAssembly", Required = Required.Always)]
+         [JsonProperty("PlatforSpecificConfiguration", Required = Required.Always)]
+         public string PlatformSpecificConfiguration { get; set; }
+
+         // LoRa configuration parameters
+         [JsonProperty("MessageHandlerAssembly", Required = Required.Always)]
 			public string MessageHandlerAssembly { get; set; }
 
 			// LoRa configuration parameters

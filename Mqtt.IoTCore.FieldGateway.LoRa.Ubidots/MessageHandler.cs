@@ -41,14 +41,17 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 		private LoggingChannel Logging { get; set; }
 		private IMqttClient MqttClient { get; set; }
 		private Rfm9XDevice Rfm9XDevice { get; set; }
+      private string PlatformSpecificConfiguration { get; set; }
 
-		void IMessageHandler.Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice)
+
+      void IMessageHandler.Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice, string platformSpecificConfiguration)
 		{
 			LoggingFields processInitialiseLoggingFields = new LoggingFields();
 
 			this.Logging = logging;
 			this.MqttClient = mqttClient;
 			this.Rfm9XDevice = rfm9XDevice;
+         this.PlatformSpecificConfiguration = platformSpecificConfiguration;
 		}
 
 		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
