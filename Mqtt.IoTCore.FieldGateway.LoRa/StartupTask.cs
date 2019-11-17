@@ -411,7 +411,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			[JsonProperty("MQTTClientID", Required = Required.Always)]
 			public string MqttClientID { get; set; }
 
-         [JsonProperty("PlatforSpecificConfiguration", Required = Required.Always)]
+         [JsonProperty("PlatformSpecificConfiguration", Required = Required.Always)]
          public string PlatformSpecificConfiguration { get; set; }
 
          // LoRa configuration parameters
