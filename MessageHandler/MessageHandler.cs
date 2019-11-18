@@ -47,7 +47,8 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			this.Logging = logging;
 			this.MqttClient = mqttClient;
 			this.Rfm9XDevice = rfm9XDevice;
-		}
+         this.PlatformSpecificConfiguration = platformSpecificConfiguration;
+      }
 
 		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
