@@ -34,10 +34,10 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 	{
 		void Initialise(LoggingChannel logging, IMqttClient mqttClient, Rfm9XDevice rfm9XDevice,string platformSpecificConfiguration);
 
-		void Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e);
+		void Rfm9XOnReceive(Rfm9XDevice.OnDataReceivedEventArgs e);
 
-		void MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e);
+		void MqttApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e);
 
-		void Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e);
+		void Rfm9xOnTransmit(Rfm9XDevice.OnDataTransmitedEventArgs e);
 	}
 }
