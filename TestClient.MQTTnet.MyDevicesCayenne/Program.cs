@@ -24,16 +24,19 @@
 	 A quick and dirty test client to explore how MyDevice Cayenne connectivity works
 	 with the MQTTnet library
  */
-namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
+namespace devmobile.Mqtt.TestClient.MyDevicesCayenne
 {
 	using System;
 	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using global::MQTTnet;
-	using global::MQTTnet.Client;
+	using MQTTnet;
+   using MQTTnet.Client;
+   using MQTTnet.Client.Disconnecting;
+   using MQTTnet.Client.Options;
+   using MQTTnet.Client.Receiving;
 
-	class Program
+   class Program
 	{
 		private static IMqttClient mqttClient = null;
 		private static IMqttClientOptions mqttOptions = null;
@@ -91,15 +94,15 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 				Console.WriteLine($"Subscribe Topic:{topic}");
 
 				mqttClient.SubscribeAsync(topic).Wait();
-				// mqttClient.SubscribeAsync(topic, global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).Wait(); 
-				// Thought this might help with subscription but it didn't, looks like ACK might be broken in MQTTnet
-				mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
-			}
-			mqttClient.Disconnected += MqttClient_Disconnected;
+            // mqttClient.SubscribeAsync(topic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).Wait(); 
+            // Thought this might help with subscription but it didn't, looks like ACK might be broken in MQTTnet
+            mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
+         }
+         mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
 
-			string topicTemperatureData = $"v1/{username}/things/{clientId}/data/{channelData}";
+         string topicTemperatureData = $"v1/{username}/things/{clientId}/data/{channelData}";
 
-			Console.WriteLine();
+         Console.WriteLine();
 
 			while (true)
 			{
@@ -119,17 +122,17 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.MyDevicesCayenne
 				Console.WriteLine("PublishAsync finish");
 				Console.WriteLine();
 
-				Thread.Sleep(30100);
+            Thread.Sleep(30100);
 			}
 		}
 
-		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
 		{
 			Console.WriteLine($"ApplicationMessageReceived ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Qos:{e.ApplicationMessage.QualityOfServiceLevel} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
-			Console.WriteLine();
-		}
+         Console.WriteLine();
+      }
 
-		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+		private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
 		{
 			Debug.WriteLine("Disconnected");
 			await Task.Delay(TimeSpan.FromSeconds(5));

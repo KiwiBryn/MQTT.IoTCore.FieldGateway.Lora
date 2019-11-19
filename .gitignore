@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /TestClient.MQTTnet.Ubidots/Properties/launchSettings.json
 /TestClient.MQTTnet.Losant/Properties/launchSettings.json
+/TestClient.MQTTnet.MyDevicesCayenne/Properties/launchSettings.json
