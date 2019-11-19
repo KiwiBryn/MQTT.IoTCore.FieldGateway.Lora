@@ -32,8 +32,11 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 
 	using MQTTnet;
 	using MQTTnet.Client;
+   using MQTTnet.Client.Disconnecting;
+   using MQTTnet.Client.Options;
+   using MQTTnet.Client.Receiving;
 
-	class Program
+   class Program
 	{
 		private static IMqttClient mqttClient = null;
 		private static IMqttClientOptions mqttOptions = null;
@@ -84,9 +87,9 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 				.WithTls()
 				.Build();
 
-			mqttClient.Disconnected += MqttClient_Disconnected;
-			mqttClient.ConnectAsync(mqttOptions).Wait();
-			mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
+         mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e=>MqttClient_Disconnected(e)));
+         mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
+         mqttClient.ConnectAsync(mqttOptions).Wait();
 
 			// Adafruit.IO format for topics which are called feeds
 			string topic = string.Empty;
@@ -124,12 +127,12 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 			}
 		}
 
-		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
-		{
-			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
+      private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+      {
+         Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
-		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+		private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
 		{
 			Debug.WriteLine("Disconnected");
 			await Task.Delay(TimeSpan.FromSeconds(5));

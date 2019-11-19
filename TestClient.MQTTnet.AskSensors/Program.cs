@@ -24,19 +24,20 @@
 	 A quick and dirty test client to explore how Ubidots MQTT connectivity with 
 	 the MQTTnet library works
 */
-namespace devmobile.Mqtt.TestClient.MQTTnet.AskSensors
+namespace devmobile.Mqtt.TestClient.AskSensors
 {
 	using System;
 	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
 
-	using global::MQTTnet;
-	using global::MQTTnet.Client;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
+	using MQTTnet;
+	using MQTTnet.Client;
+   using MQTTnet.Client.Disconnecting;
+   using MQTTnet.Client.Options;
+   using MQTTnet.Client.Receiving;
 
-	class Program
+   class Program
 	{
 		private static IMqttClient mqttClient = null;
 		private static IMqttClientOptions mqttOptions = null;
@@ -73,9 +74,9 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.AskSensors
 				//.WithTls()
 				.Build();
 
-			mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
-			mqttClient.Disconnected += MqttClient_Disconnected;
-			mqttClient.ConnectAsync(mqttOptions).Wait();
+         mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
+         mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
+         mqttClient.ConnectAsync(mqttOptions).Wait();
 
 			// AskSensors formatted client state update topic
 			string stateTopic = $"{username}/{apiKey}";
@@ -114,12 +115,12 @@ namespace devmobile.Mqtt.TestClient.MQTTnet.AskSensors
 			}
 		}
 
-		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
 		{
 			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
-		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+		private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
 		{
 			Debug.WriteLine("Disconnected");
 			await Task.Delay(TimeSpan.FromSeconds(5));

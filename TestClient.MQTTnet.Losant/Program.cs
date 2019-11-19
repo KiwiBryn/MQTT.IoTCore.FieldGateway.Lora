@@ -32,7 +32,10 @@ namespace devmobile.Mqtt.TestClient.Losant
 	using System.Threading.Tasks;
    using MQTTnet;
 	using MQTTnet.Client;
-	using Newtonsoft.Json;
+   using MQTTnet.Client.Disconnecting;
+   using MQTTnet.Client.Options;
+   using MQTTnet.Client.Receiving;
+   using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
 	class Program
@@ -72,9 +75,9 @@ namespace devmobile.Mqtt.TestClient.Losant
 				.WithTls()
 				.Build();
 
-			mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
-			mqttClient.Disconnected += MqttClient_Disconnected;
-			mqttClient.ConnectAsync(mqttOptions).Wait();
+         mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
+         mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
+         mqttClient.ConnectAsync(mqttOptions).Wait();
 
 			// Setup a subscription for commands sent to client
 			string commandTopic = $"losant/{clientId}/command";
@@ -154,12 +157,12 @@ namespace devmobile.Mqtt.TestClient.Losant
 			}
 		}
 
-		private static void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
 		{
 			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
-		private static async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+		private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
 		{
 			Debug.WriteLine("Disconnected");
 			await Task.Delay(TimeSpan.FromSeconds(5));
