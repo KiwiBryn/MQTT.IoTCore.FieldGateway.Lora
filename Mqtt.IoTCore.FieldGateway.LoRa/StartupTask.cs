@@ -34,7 +34,10 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 
 	using MQTTnet;
 	using MQTTnet.Client;
-	using Newtonsoft.Json;
+   using MQTTnet.Client.Disconnecting;
+   using MQTTnet.Client.Options;
+   using MQTTnet.Client.Receiving;
+   using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 	using Windows.ApplicationModel;
 	using Windows.ApplicationModel.Background;
@@ -188,8 +191,12 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			var factory = new MqttFactory();
 			this.mqttClient = factory.CreateMqttClient();
 
-			try
-			{ 
+         // Wire up a handler for disconnect event for retry
+         mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
+         mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
+
+         try
+         { 
 				this.mqttOptions = new MqttClientOptionsBuilder()
 							.WithClientId(applicationSettings.MqttClientID)
 							.WithTcpServer(applicationSettings.MqttServer)
@@ -206,13 +213,9 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 				return;
 			}
 
-			// Wire up a handler for disconnect event for retry
-			this.mqttClient.ApplicationMessageReceived += MqttClient_ApplicationMessageReceived;
-			this.mqttClient.Disconnected += MqttClient_Disconnected;
-
-			// Load up the message handler assembly
-			try
-			{
+         // Load up the message handler assembly
+         try
+         {
 				Assembly assembly = Assembly.Load(applicationSettings.MessageHandlerAssembly);
 
 				messageHandler = (IMessageHandler)assembly.CreateInstance("devMobile.Mqtt.IoTCore.FieldGateway.MessageHandler");
@@ -300,7 +303,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			this.deferral = taskInstance.GetDeferral();
 		}
 
-		private async void MqttClient_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+		private async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
 		{
 			LoggingFields mqttConnectRetry = new LoggingFields();
 
@@ -319,7 +322,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			}
 		}
 
-		private void MqttClient_ApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		private void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
 		{
 			LoggingFields messageHandlerLoggingFields = new LoggingFields();
 #if DEBUG
@@ -333,7 +336,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.MqttApplicationMessageReceived(sender, e);
+					messageHandler.MqttApplicationMessageReceived(e);
 				}
 				catch (Exception ex)
 				{
@@ -355,7 +358,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.Rfm9xOnTransmit(sender, e);
+					messageHandler.Rfm9xOnTransmit(e);
 				}
 				catch (Exception ex)
 				{
@@ -385,7 +388,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway.LoRa
 			{
 				try
 				{
-					messageHandler.Rfm9XOnReceive(sender, e);
+					messageHandler.Rfm9XOnReceive(e);
 				}
 				catch (Exception ex)
 				{
