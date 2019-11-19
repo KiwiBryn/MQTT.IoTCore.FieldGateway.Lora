@@ -54,7 +54,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
          this.PlatformSpecificConfiguration = platformSpecificConfiguration;
 		}
 
-		async void IMessageHandler.Rfm9XOnReceive(object sender, Rfm9XDevice.OnDataReceivedEventArgs e)
+		async void IMessageHandler.Rfm9XOnReceive(Rfm9XDevice.OnDataReceivedEventArgs e)
 		{
 			LoggingFields processReceiveLoggingFields = new LoggingFields();
 			JObject telemetryDataPoint = new JObject();
@@ -131,7 +131,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			}
 		}
 
-		void IMessageHandler.MqttApplicationMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
+		void IMessageHandler.MqttApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
 		{
 			LoggingFields processReceiveLoggingFields = new LoggingFields();
 
@@ -146,7 +146,7 @@ namespace devMobile.Mqtt.IoTCore.FieldGateway
 			this.Logging.LogEvent("MqttApplicationMessageReceived topic not processed", processReceiveLoggingFields, LoggingLevel.Error);
 		}
 
-		void IMessageHandler.Rfm9xOnTransmit(object sender, Rfm9XDevice.OnDataTransmitedEventArgs e)
+		void IMessageHandler.Rfm9xOnTransmit(Rfm9XDevice.OnDataTransmitedEventArgs e)
 		{
 		}
 	}
