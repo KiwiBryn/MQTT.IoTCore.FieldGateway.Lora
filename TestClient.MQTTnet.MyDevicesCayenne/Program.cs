@@ -112,8 +112,7 @@ namespace devmobile.Mqtt.TestClient.MyDevicesCayenne
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(topicTemperatureData)
 					.WithPayload(value)
-					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-					//.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce) // Causes publish to hang
+               .WithAtLeastOnceQoS()
 					.WithRetainFlag()
 				.Build();
 
