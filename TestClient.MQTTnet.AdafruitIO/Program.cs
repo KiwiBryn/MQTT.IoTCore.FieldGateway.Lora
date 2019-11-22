@@ -115,7 +115,6 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 					.WithTopic(topic)
 					.WithPayload(value)
 					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				.WithExactlyOnceQoS()
 				.WithRetainFlag()
 				.Build();
 
