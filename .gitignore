@@ -263,3 +263,6 @@ __pycache__/
 /TestClient.MQTTnet.Losant/Properties/launchSettings.json
 /TestClient.MQTTnet.MyDevicesCayenne/Properties/launchSettings.json
 /TestClient.MQTTnet.MathWorksThingSpeak/Properties/launchSettings.json
+/TestClient.MQTTnet.AdafruitIO/Properties/launchSettings.json
+/TestClient.MQTTnet.AskSensors/Properties/launchSettings.json
+/TestClient.MQTTnet.AzureIoTHub/Properties/launchSettings.json
