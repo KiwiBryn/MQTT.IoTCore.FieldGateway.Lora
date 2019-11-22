@@ -48,29 +48,61 @@ I have sample client applications which show how to send telemetry from
 * [@Arduino Nano with EasySensors RFM69/95 Shield](https://blog.devmobile.co.nz/2018/11/24/easy-sensors-lora-wireless-field-gateway-arduino-nano-client/)
 * [@Wisen Whisper Node-LoRa 915MHz](https://blog.devmobile.co.nz/2018/09/24/wisen-whisper-node-lora-915-mhz-payload-addressing-client/)
 
-An empty configuration file is created the first time the application is run. A minimal configuration file has the
+An empty configuration file is created the first time the application is run. A minimal configuration file has the following settings
 
+Adafruit.IO configuration V1
 ```Json
 {
-  "MQTTUserName": "",
-  "MQTTPassword": "",
-  "MqttTopicFormat": "{0}/feeds/{1}{2}",
-  "MQTTClientID": "",
-  "MQTTServer": "",
-  "Address": "LoRaIoT2",
-  "Frequency": 433000000.0
+  "MQTTUserName": "User name here",
+  "MQTTPassword": "AIO key here",
+  "MQTTClientID": "MQTTLoRaGateway",
+  "MQTTServer": "io.adafruit.com",
+  "Address": "LoRaIoT1",
+  "Frequency": 915000000.0,
+  "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Adafruit",
+  "PlatformSpecificConfiguration": "mqttloragateway"
+}
+```
+
+Losant configuration V1
+```Json
+{
+  "MQTTUserName": "From Access key file",
+  "MQTTPassword": "From Access key file",
+  "MQTTClientID": "From Devices setup",
+  "MQTTServer": "broker.losant.com",
+  "Address": "LoRaIoT1",
+  "Frequency": 915000000.0,
+  "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Losant",
+  "PlatformSpecificConfiguration": ""
+}
+```
+
+Ubidots  configuration V1
+```Json
+{
+  "MQTTUserName": "From My Profile\APIKeys",
+  "MQTTPassword": "SomeNotVerySecureRandomText",
+  "MQTTClientID": "From Device setup",
+  "MQTTServer": "industrial.api.ubidots.com",
+  "Address": "LoRaIoT1",
+  "Frequency": 915000000.0,
+  "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Ubidots",
+  "PlatformSpecificConfiguration": ""
 }
 ```
 
 The initial packet format is detailed in these blog posts [@IoTCore](https://blog.devmobile.co.nz/2018/09/03/rfm9x-iotcore-payload-addressing/) and [@NetMF](https://blog.devmobile.co.nz/2018/09/04/rfm9x-netmf-payload-addressing/). It was intentionally kept simple to make it easier for students to user and debug.
 
 Future proposed enhancements include
-  * AdaFruit.IO connectivity (Done April 2018)
+  * AdaFruit.IO connectivity (Done April 2019)
+  * Losant (Done April 2019)
+  * Ubidots (Done April 2019)
   * Cayenne Low Power Packet(LPP) format
-  * MyDevices Cayenne MQTT support
-  * Azure IoT Hub MQTT support
-  * Thingspeak MQTT support
-  * Cloud to device messaging
+  * MyDevices Cayenne MQTT support (PoC client Apr 2019)
+  * Azure IoT Hub MQTT support (PoC client Nov 2019)
+  * Thingspeak MQTT support (PoC client Nov 2019)
+  * Cloud to device messaging 
   * OTA device provisioning
   * OTA Data encryption
   * Support for other Windows 10 IoT Core devices e.g. Dragon Board 410C
