@@ -136,8 +136,7 @@ namespace TestClient.MQTT.MathWorksThingSpeak
             var message = new MqttApplicationMessageBuilder()
                .WithTopic(topicTemperatureData)
                .WithPayload(value)
-               .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-//               .WithRetainFlag()
+               .WithAtMostOnceQoS()
             .Build();
 
             Console.WriteLine("PublishAsync start");
