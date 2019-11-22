@@ -101,11 +101,8 @@ namespace devmobile.Mqtt.TestClient.AskSensors
             var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
 					.WithPayload(payloadText)
-					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				   .WithExactlyOnceQoS()
-				   //.WithAtLeastOnceQoS()
-				   //.WithRetainFlag()
-				   .Build();
+               .WithAtLeastOnceQoS()
+               .Build();
 
 				Console.WriteLine("PublishAsync start");
 				mqttClient.PublishAsync(message).Wait();
