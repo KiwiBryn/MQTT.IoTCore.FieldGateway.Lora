@@ -140,11 +140,10 @@ namespace devmobile.Mqtt.TestClient.Ubidots
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
 					.WithPayload(payloadText)
-					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				//.WithExactlyOnceQoS()// With ubidots this caused the publish to hang
-				.WithAtLeastOnceQoS()
-				.WithRetainFlag() 
-				.Build();
+					//.WithExactlyOnceQoS()// With ubidots this caused the publish to hang
+				   .WithAtLeastOnceQoS()
+				   .WithRetainFlag() 
+				   .Build();
 
 				Console.WriteLine("PublishAsync start");
 				mqttClient.PublishAsync(message).Wait();
