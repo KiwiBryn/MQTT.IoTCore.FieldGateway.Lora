@@ -143,11 +143,10 @@ namespace devmobile.Mqtt.TestClient.Losant
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(stateTopic)
 					.WithPayload(payloadText)
-					.WithQualityOfServiceLevel(global::MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				//.WithExactlyOnceQoS() With Losant this caused the publish to hang
-				.WithAtLeastOnceQoS()
-				//.WithRetainFlag() Losant doesn't allow this flag
-				.Build();
+				   //.WithExactlyOnceQoS() With Losant this caused the publish to hang
+				   .WithAtLeastOnceQoS()
+				   //.WithRetainFlag() Losant doesn't allow this flag
+				   .Build();
 
 				Console.WriteLine("PublishAsync start");
 				mqttClient.PublishAsync(message).Wait();
