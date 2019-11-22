@@ -114,8 +114,8 @@ namespace devMobile.Mqtt.TestClient.AdaFruit
 				var message = new MqttApplicationMessageBuilder()
 					.WithTopic(topic)
 					.WithPayload(value)
-					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				.WithRetainFlag()
+               .WithAtLeastOnceQoS()
+				   .WithRetainFlag()
 				.Build();
 
 				Console.WriteLine("PublishAsync start");
