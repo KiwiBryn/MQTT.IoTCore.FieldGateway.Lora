@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 A quick and dirty test client to explore how Ubidots MQTT connectivity with 
+	 A quick and dirty test client to explore how AskSensors MQTT connectivity with 
 	 the MQTTnet library works
 */
 namespace devmobile.Mqtt.TestClient.AskSensors
