@@ -50,7 +50,7 @@ I have sample client applications which show how to send telemetry from
 
 An empty configuration file is created the first time the application is run. A minimal configuration file has the following settings
 
-Adafruit.IO configuration
+Adafruit.IO configuration V1
 ```Json
 {
   "MQTTUserName": "User name here",
@@ -63,7 +63,8 @@ Adafruit.IO configuration
   "PlatformSpecificConfiguration": "mqttloragateway"
 }
 ```
-Losant
+
+Losant configuration V1
 ```Json
 {
   "MQTTUserName": "From Access key file",
@@ -75,8 +76,9 @@ Losant
   "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Losant",
   "PlatformSpecificConfiguration": ""
 }
+```
 
-Ubidots
+Ubidots  configuration V1
 ```Json
 {
   "MQTTUserName": "From My Profile\APIKeys",
@@ -88,6 +90,7 @@ Ubidots
   "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Ubidots",
   "PlatformSpecificConfiguration": ""
 }
+```
 
 The initial packet format is detailed in these blog posts [@IoTCore](https://blog.devmobile.co.nz/2018/09/03/rfm9x-iotcore-payload-addressing/) and [@NetMF](https://blog.devmobile.co.nz/2018/09/04/rfm9x-netmf-payload-addressing/). It was intentionally kept simple to make it easier for students to user and debug.
 
