@@ -28,6 +28,7 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
    using System;
    using System.Diagnostics;
    using System.Globalization;
+   using System.Net;
    using System.Security.Cryptography;
    using System.Text;
    using System.Threading;
@@ -75,7 +76,7 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
 
          Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId}");
 
-         string token = createToken($"{server}/devices/{clientId}", password, new TimeSpan(31,0,0,0));
+         string token = generateSasToken($"{server}/devices/{clientId}", password, "", new TimeSpan(1,0,0));
 
          mqttOptions = new MqttClientOptionsBuilder()
             .WithTcpServer(server, 8883)
@@ -134,15 +135,23 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
          }
       }
 
-      private static string createToken(string resourceUri,string key, TimeSpan ttl)
+      public static string generateSasToken(string resourceUri, string key, string policyName, TimeSpan ttl)
       {
-         TimeSpan afterEpoch = DateTime.UtcNow.Add( ttl ) - new DateTime(1970, 1, 1);
+         TimeSpan fromEpochStart = DateTime.UtcNow.Add(ttl) - DateTime.UnixEpoch;
 
-         string expiry = afterEpoch.TotalSeconds.ToString("F0");
-         string stringToSign = HttpUtility.UrlEncode(resourceUri) + "\n" + expiry;
+         string expiry = Convert.ToString((int)fromEpochStart.TotalSeconds);
+         string stringToSign = WebUtility.UrlEncode(resourceUri) + "\n" + expiry;
          HMACSHA256 hmac = new HMACSHA256(Convert.FromBase64String(key));
          string signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(stringToSign)));
-         return  String.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}", HttpUtility.UrlEncode(resourceUri), HttpUtility.UrlEncode(signature), expiry);
+
+         string token = String.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}", WebUtility.UrlEncode(resourceUri), WebUtility.UrlEncode(signature), expiry);
+
+         if (!String.IsNullOrEmpty(policyName))
+         {
+            token += "&skn=" + policyName;
+         }
+
+         return token;
       }
    }
 }
