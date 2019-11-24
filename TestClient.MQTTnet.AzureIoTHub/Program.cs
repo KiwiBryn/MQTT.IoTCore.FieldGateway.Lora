@@ -27,9 +27,12 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
 {
    using System;
    using System.Diagnostics;
+   using System.Globalization;
+   using System.Security.Cryptography;
+   using System.Text;
    using System.Threading;
    using System.Threading.Tasks;
-
+   using System.Web;
    using MQTTnet;
    using MQTTnet.Client;
    using MQTTnet.Client.Disconnecting;
@@ -72,9 +75,11 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
 
          Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId}");
 
+         string token = createToken($"{server}/devices/{clientId}", password, new TimeSpan(31,0,0,0));
+
          mqttOptions = new MqttClientOptionsBuilder()
             .WithTcpServer(server, 8883)
-            .WithCredentials(username, password)
+            .WithCredentials(username, token)
             .WithClientId(clientId)
             .WithTls()
             .Build();
@@ -127,6 +132,17 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
          {
             Debug.WriteLine("Reconnect failed {0}", ex.Message);
          }
+      }
+
+      private static string createToken(string resourceUri,string key, TimeSpan ttl)
+      {
+         TimeSpan afterEpoch = DateTime.UtcNow.Add( ttl ) - new DateTime(1970, 1, 1);
+
+         string expiry = afterEpoch.TotalSeconds.ToString("F0");
+         string stringToSign = HttpUtility.UrlEncode(resourceUri) + "\n" + expiry;
+         HMACSHA256 hmac = new HMACSHA256(Convert.FromBase64String(key));
+         string signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(stringToSign)));
+         return  String.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}", HttpUtility.UrlEncode(resourceUri), HttpUtility.UrlEncode(signature), expiry);
       }
    }
 }
