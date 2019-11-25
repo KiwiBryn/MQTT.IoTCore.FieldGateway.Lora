@@ -81,13 +81,27 @@ Losant configuration V1
 Ubidots  configuration V1
 ```Json
 {
-  "MQTTUserName": "From My Profile\APIKeys",
+  "MQTTUserName": "From My Profile/APIKeys",
   "MQTTPassword": "SomeNotVerySecureRandomText",
   "MQTTClientID": "From Device setup",
   "MQTTServer": "industrial.api.ubidots.com",
   "Address": "LoRaIoT1",
   "Frequency": 915000000.0,
   "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.Ubidots",
+  "PlatformSpecificConfiguration": ""
+}
+```
+
+Azure IoT Hub configuration V1
+```Json
+{
+  "MQTTUserName": "YourIoTHubHub.azure-devices.net/MQTTLoRa915MHz/api-version=2018-06-30",
+  "MQTTPassword": "SharedAccessSignature sr=YourIoTHubHub.azure-devices.net%2Fdevices%2FMQTTLoRa915MHz&sig=123456789012345678901234567890123456789012345%3D&se=1574673583",
+  "MQTTClientID": "MQTTLoRa915MHz",
+  "MQTTServer": "YourIoTHubHub.azure-devices.net",
+  "Address": "LoRaIoT1",
+  "Frequency": 915000000.0,
+  "MessageHandlerAssembly": "Mqtt.IoTCore.FieldGateway.LoRa.AzureIoTHub",
   "PlatformSpecificConfiguration": ""
 }
 ```
