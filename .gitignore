@@ -266,3 +266,4 @@ __pycache__/
 /TestClient.MQTTnet.AdafruitIO/Properties/launchSettings.json
 /TestClient.MQTTnet.AskSensors/Properties/launchSettings.json
 /TestClient.MQTTnet.AzureIoTHub/Properties/launchSettings.json
+/TestClient.MQTTnet.ThingsBoard/Properties/launchSettings.json
