@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 Yest another test client for exploring a vednors MQTT connectivity works
+	 Yet another test client for exploring a vednors MQTT connectivity works
  */
 namespace devMobile.Mqtt.TestClient.ThingsBoard
 {
