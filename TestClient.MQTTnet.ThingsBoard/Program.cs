@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 Yet another test client for exploring a vednors MQTT connectivity works
+	 Yet another test client for exploring a vendors MQTT connectivity works
  */
 namespace devMobile.Mqtt.TestClient.ThingsBoard
 {
@@ -71,31 +71,27 @@ namespace devMobile.Mqtt.TestClient.ThingsBoard
             Console.WriteLine($"MQTT Server:{server} ClientID:{clientId}");
          }
 
-         /*
          if (args.Length == 4)
          {
             commandTopic = args[3];
             Console.WriteLine($"MQTT Server:{server} ClientID:{clientId} CommandTopic:{commandTopic}");
          }
-         */
 
          mqttOptions = new MqttClientOptionsBuilder()
             .WithTcpServer(server)
             .WithCredentials(username, "")
             .WithClientId(clientId)
-            //.WithTls() blows up if this enabled, need to do more research.
+            //.WithTls() blows up if this enabled, need to do more research on certificate config.
             .Build();
 
          mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
          mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
          mqttClient.ConnectAsync(mqttOptions).Wait();
 
-         /*
          if (args.Length == 4)
          {
             mqttClient.SubscribeAsync(commandTopic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
          }
-         */
 
          while (true)
          {
