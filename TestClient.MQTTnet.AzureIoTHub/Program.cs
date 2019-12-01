@@ -135,16 +135,17 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
          }
       }
 
-      public static string generateSasToken(string resourceUri, string key, string policyName, TimeSpan ttl)
+      public static string generateSasToken(string resourceUri, string key, string policyName, TimeSpan timeToLive)
       {
-         TimeSpan fromEpochStart = DateTime.UtcNow.Add(ttl) - DateTime.UnixEpoch;
+         DateTimeOffset expiryDateTimeOffset = new DateTimeOffset(DateTime.UtcNow.Add(timeToLive));
 
-         string expiry = Convert.ToString((int)fromEpochStart.TotalSeconds);
-         string stringToSign = WebUtility.UrlEncode(resourceUri) + "\n" + expiry;
+         string expiryEpoch = expiryDateTimeOffset.ToUnixTimeSeconds().ToString();
+         string stringToSign = WebUtility.UrlEncode(resourceUri) + "\n" + expiryEpoch;
+
          HMACSHA256 hmac = new HMACSHA256(Convert.FromBase64String(key));
          string signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(stringToSign)));
 
-         string token = String.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}", WebUtility.UrlEncode(resourceUri), WebUtility.UrlEncode(signature), expiry);
+         string token = $"SharedAccessSignature sr={WebUtility.UrlEncode(resourceUri)}&sig={WebUtility.UrlEncode(signature)}&se={expiryEpoch}";
 
          if (!String.IsNullOrEmpty(policyName))
          {
