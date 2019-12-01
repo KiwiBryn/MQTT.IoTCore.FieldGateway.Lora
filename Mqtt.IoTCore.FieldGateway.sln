@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.AzureIoT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mqtt.IoTCore.FieldGateway.LoRa.AzureIoTHub", "Mqtt.IoTCore.FieldGateway.LoRa.AzureIoTHub\Mqtt.IoTCore.FieldGateway.LoRa.AzureIoTHub.csproj", "{3DD34FD2-452B-49B6-BB64-94DEB69E7D25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.ThingsBoard", "TestClient.MQTTnet.ThingsBoard\TestClient.MQTTnet.ThingsBoard.csproj", "{86BECEEA-5800-423E-9752-6C0229CE893B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.ThingsBoard", "TestClient.MQTTnet.ThingsBoard\TestClient.MQTTnet.ThingsBoard.csproj", "{86BECEEA-5800-423E-9752-6C0229CE893B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.SmartWorks", "TestClient.MQTTnet.SmartWorks\TestClient.MQTTnet.SmartWorks.csproj", "{3F1BEF61-D0BF-4781-A408-46569CA82C8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -373,6 +375,26 @@ Global
 		{86BECEEA-5800-423E-9752-6C0229CE893B}.Release|x64.Build.0 = Release|Any CPU
 		{86BECEEA-5800-423E-9752-6C0229CE893B}.Release|x86.ActiveCfg = Release|Any CPU
 		{86BECEEA-5800-423E-9752-6C0229CE893B}.Release|x86.Build.0 = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|x64.Build.0 = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Debug|x86.Build.0 = Debug|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|ARM.Build.0 = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|ARM64.Build.0 = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|x64.ActiveCfg = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|x64.Build.0 = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|x86.ActiveCfg = Release|Any CPU
+		{3F1BEF61-D0BF-4781-A408-46569CA82C8E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
