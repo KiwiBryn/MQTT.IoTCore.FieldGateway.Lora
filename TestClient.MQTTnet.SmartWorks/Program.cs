@@ -34,7 +34,6 @@ namespace devMobile.Mqtt.TestClient.SmartWorks
    using MQTTnet.Client;
    using MQTTnet.Client.Disconnecting;
    using MQTTnet.Client.Options;
-   using MQTTnet.Client.Receiving;
    using Newtonsoft.Json;
    using Newtonsoft.Json.Linq;
 
@@ -45,9 +44,6 @@ namespace devMobile.Mqtt.TestClient.SmartWorks
       private static string server;
       private static string username;
       private static string clientId;
-      private static string commandTopic;
-      private static string groupname;
-      private static string feedname;
 
       static void Main(string[] args)
       {
@@ -76,7 +72,7 @@ namespace devMobile.Mqtt.TestClient.SmartWorks
          mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
          mqttClient.ConnectAsync(mqttOptions).Wait();
 
-         // Adafruit.IO format for topics which are called feeds
+         // Smartworks format for topics which are called streams
          string topicD2C = $"{username}/streams";
 
          while (true)
