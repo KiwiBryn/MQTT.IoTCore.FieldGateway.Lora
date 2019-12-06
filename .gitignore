@@ -268,3 +268,4 @@ __pycache__/
 /TestClient.MQTTnet.AzureIoTHub/Properties/launchSettings.json
 /TestClient.MQTTnet.ThingsBoard/Properties/launchSettings.json
 /TestClient.MQTTnet.SmartWorks/Properties/launchSettings.json
+/TestClient.MQTTnet.WolkAbout/Properties/launchSettings.json
