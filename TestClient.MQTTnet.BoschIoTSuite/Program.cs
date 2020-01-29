@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright ® 2019 April/November devMobile Software, All Rights Reserved
+    Copyright ® 2019 December devMobile Software, All Rights Reserved
  
     MIT License
 
@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-	 A quick and dirty test client to explore how Adafruit.IO MQTT connectivity works
+	 A quick and dirty test client to explore how BoschIoT Suite MQTT connectivity works
  */
 namespace devMobile.Mqtt.TestClient.BoschIoTSuite
 {
@@ -46,9 +46,6 @@ namespace devMobile.Mqtt.TestClient.BoschIoTSuite
       private static string username;
       private static string password;
       private static string clientId;
-      private static string commandTopic;
-      private static string groupname;
-      private static string feedname;
 
       static void Main(string[] args)
       {
