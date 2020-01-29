@@ -76,11 +76,11 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
 
          Console.WriteLine($"MQTT Server:{server} Username:{username} ClientID:{clientId}");
 
-         string token = generateSasToken($"{server}/devices/{clientId}", password, "", new TimeSpan(1,0,0));
+         string token = generateSasToken($"{server}/devices/{clientId}", password, "", new TimeSpan(1,0,0,0));
 
          mqttOptions = new MqttClientOptionsBuilder()
             .WithTcpServer(server, 8883)
-            .WithCredentials(username, token)
+				.WithCredentials(username, token)
             .WithClientId(clientId)
             .WithTls()
             .Build();
@@ -89,9 +89,9 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
          mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
          mqttClient.ConnectAsync(mqttOptions).Wait();
 
-         mqttClient.SubscribeAsync(topicC2D, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
+			mqttClient.SubscribeAsync(topicC2D, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
 
-         while (true)
+			while (true)
          {
             JObject payloadJObject = new JObject();
 
@@ -99,7 +99,7 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
             payloadJObject.Add("OfficeHumidity", (DateTime.UtcNow.Second + 40).ToString());
 
             string payload = JsonConvert.SerializeObject(payloadJObject);
-            Console.WriteLine($"Topic:{topicD2C} Payload:{payload}");
+            Console.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Topic:{topicD2C} Length: {payload.Length} Payload:{payload}");
 
             var message = new MqttApplicationMessageBuilder()
                .WithTopic(topicD2C)
@@ -107,22 +107,29 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
                .WithAtLeastOnceQoS()
             .Build();
 
-            Console.WriteLine("PublishAsync start");
-            mqttClient.PublishAsync(message).Wait();
-            Console.WriteLine("PublishAsync finish");
+				try
+				{
+					Console.WriteLine("PublishAsync start");
+					mqttClient.PublishAsync(message).Wait();
+					Console.WriteLine("PublishAsync finish");
+				}
+				catch( Exception ex)
+				{
+					Console.WriteLine($"{DateTime.UtcNow:hh:mm:ss} PublishAsync failed {ex.Message}");
+				}
 
-            Thread.Sleep(30100);
-         }
+				Thread.Sleep(new TimeSpan(0, 2, 0));
+			}
       }
 
       private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
       {
-         Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
+         Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Length:{e.ApplicationMessage.ConvertPayloadToString().Length} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
       }
 
       private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
       {
-         Debug.WriteLine("Disconnected");
+         Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Disconnected");
          await Task.Delay(TimeSpan.FromSeconds(5));
 
          try
@@ -131,7 +138,7 @@ namespace devMobile.Mqtt.TestClient.AzureIoTHub
          }
          catch (Exception ex)
          {
-            Debug.WriteLine("Reconnect failed {0}", ex.Message);
+            Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Reconnect failed {0}", ex.Message);
          }
       }
 
