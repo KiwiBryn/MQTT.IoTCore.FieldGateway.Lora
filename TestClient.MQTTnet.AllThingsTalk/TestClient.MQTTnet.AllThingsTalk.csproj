@@ -6,4 +6,9 @@
     <RootNamespace>devmobile.Mqtt.TestClient.MQTTnet.AllThingsTalk</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MQTTnet" Version="3.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
 </Project>
