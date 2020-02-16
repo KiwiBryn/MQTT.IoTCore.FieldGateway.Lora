@@ -39,7 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.SmartWor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.WolkAbout", "TestClient.MQTTnet.WolkAbout\TestClient.MQTTnet.WolkAbout.csproj", "{33D0743F-84BC-45A0-AC9A-0477FDEB8C00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.BoschIoTSuite", "TestClient.MQTTnet.BoschIoTSuite\TestClient.MQTTnet.BoschIoTSuite.csproj", "{9CA60D63-3AAA-4823-8FF0-2E39DB0748D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient.MQTTnet.BoschIoTSuite", "TestClient.MQTTnet.BoschIoTSuite\TestClient.MQTTnet.BoschIoTSuite.csproj", "{9CA60D63-3AAA-4823-8FF0-2E39DB0748D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient.MQTTnet.AllThingsTalk", "TestClient.MQTTnet.AllThingsTalk\TestClient.MQTTnet.AllThingsTalk.csproj", "{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -439,6 +441,26 @@ Global
 		{9CA60D63-3AAA-4823-8FF0-2E39DB0748D2}.Release|x64.Build.0 = Release|Any CPU
 		{9CA60D63-3AAA-4823-8FF0-2E39DB0748D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{9CA60D63-3AAA-4823-8FF0-2E39DB0748D2}.Release|x86.Build.0 = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|ARM.Build.0 = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|ARM64.Build.0 = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|x64.Build.0 = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{F94B5D20-1DE4-4D69-BB37-1B522DB837D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
