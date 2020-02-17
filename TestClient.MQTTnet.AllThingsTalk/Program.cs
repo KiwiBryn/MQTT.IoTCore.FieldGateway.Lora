@@ -35,6 +35,7 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 	using MQTTnet.Client;
 	using MQTTnet.Client.Disconnecting;
 	using MQTTnet.Client.Options;
+	using MQTTnet.Client.Receiving;
 
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -64,7 +65,7 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 			username = args[1];
 			deviceID = args[2];
 
-			Console.WriteLine($"MQTT Server:{server} ClientID:{deviceID}");
+			Console.WriteLine($"MQTT Server:{server} DeviceID:{deviceID}");
 
 			// AllThingsTalk formatted device state update topic
 			string topicD2C = $"device/{deviceID}/state";
@@ -77,7 +78,13 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 				.Build();
 
 			mqttClient.UseDisconnectedHandler(new MqttClientDisconnectedHandlerDelegate(e => MqttClient_Disconnected(e)));
+			mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
 			mqttClient.ConnectAsync(mqttOptions).Wait();
+
+			// AllThingsTalk formatted device command wildcard topic
+			string topicC2D = $"device/{deviceID}/asset/+/command";
+
+			mqttClient.SubscribeAsync(topicC2D, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
 
 			while (true)
 			{
@@ -114,6 +121,11 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 
 				Thread.Sleep(15100);
 			}
+		}
+
+		private static void MqttClient_ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+		{
+			Console.WriteLine($"ClientId:{e.ClientId} Topic:{e.ApplicationMessage.Topic} Payload:{e.ApplicationMessage.ConvertPayloadToString()}");
 		}
 
 		private static async void MqttClient_Disconnected(MqttClientDisconnectedEventArgs e)
