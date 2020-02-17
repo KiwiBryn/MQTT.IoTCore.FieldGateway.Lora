@@ -81,7 +81,7 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 			mqttClient.UseApplicationMessageReceivedHandler(new MqttApplicationMessageReceivedHandlerDelegate(e => MqttClient_ApplicationMessageReceived(e)));
 			mqttClient.ConnectAsync(mqttOptions).Wait();
 
-			// AllThingsTalk formatted device command wildcard topic
+			// AllThingsTalk formatted device command with wildcard topic
 			string topicC2D = $"device/{deviceID}/asset/+/command";
 
 			mqttClient.SubscribeAsync(topicC2D, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce).GetAwaiter().GetResult();
@@ -91,7 +91,9 @@ namespace devmobile.Mqtt.TestClient.AllThingsTalk
 				JObject payloadJObject = new JObject();
 
 				double temperature = 22.0 + (DateTime.UtcNow.Millisecond / 1000.0);
+				temperature = Math.Round( temperature, 1 );
 				double humidity = 50 + (DateTime.UtcNow.Millisecond / 100.0);
+				humidity = Math.Round(humidity, 1);
 
 				JObject temperatureJObject = new JObject
 				{
